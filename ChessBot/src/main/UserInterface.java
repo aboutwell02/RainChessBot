@@ -35,17 +35,87 @@ public class UserInterface extends JPanel{
 		drawBorders(g);
 		drawBoard(g);
 		drawPieces(g);
+		//testPNGDraw(g);
+	}
+	public void testPNGDraw(Graphics g) {
+		Image pieceImage;
+		
+		pieceImage = new ImageIcon("C:/Users/ajab0/git/RainChessBot/ChessBot/res/ChessPiecesArray.png").getImage();
+		// Black Queen on a8
+		g.drawImage(pieceImage, (int)(border), (int)(border), (int)(border+squareSize), (int)(border+squareSize), 0, 0, 60, 60, null);
+		// Black Queen on d8
+		g.drawImage(pieceImage, (int)((4)*squareSize)+border, (int)(0)+border, (int)((4+1)*squareSize)+border, (int)((0+1)*squareSize)+border, 0, 0, 60, 60, null);
+		//White Pawn on e2
+		g.drawImage(pieceImage, (int)((4)*squareSize)+border, (int)((6)*squareSize)+border, (int)((4+1)*squareSize)+border, (int)((6+1)*squareSize)+border, (5*60), (1*60), ((5+1)*60), ((1+1)*60), null);
+		// White King on e1
+		g.drawImage(pieceImage, (int)((4)*squareSize)+border, (int)((7)*squareSize)+border, (int)((4+1)*squareSize)+border, (int)((7+1)*squareSize)+border, ((1)*60), ((1)*60), ((1+1)*60), ((1+1)*60), null);
+
 	}
 	public void drawBoard(Graphics g) {
 		for (int i = 0; i < 64; i += 2) {
 			g.setColor(new Color(255, 200, 100));
+			g.fill3DRect((int) (((i%8)+(i/8)%2)*squareSize)+border, (int) ((i/8)*squareSize)+border, (int) (squareSize), (int) (squareSize), true);
+			g.setColor(new Color(150, 50, 30));
+			g.fill3DRect((int) (((i+1)%8-((i+1)/8)%2)*squareSize)+border, (int) (((i+1)/8)*squareSize)+border, (int) (squareSize), (int) (squareSize), true);
 		}
 	}
 	public void drawPieces(Graphics g) {
+		// Single PNG Method
+		Image pieceImage;
 		
+		pieceImage = new ImageIcon("C:/Users/ajab0/git/RainChessBot/ChessBot/res/ChessPiecesArray.png").getImage();
+		System.out.println("Entering loop");
+		for (int i = 0; i < 64; i++) {
+			System.out.println("Iteration " + i);
+			int j = -1, k = -1;
+			if (((WP>>>i)&1) == 1) {j = 5; k = humanIsWhite;}
+			else if (((BP>>>i)&1) == 1) {j = 5; k = 1 - humanIsWhite;}
+			else if (((WN>>>i)&1) == 1) {j = 3; k = humanIsWhite;}
+			else if (((BN>>>i)&1) == 1) {j = 3; k = 1 - humanIsWhite;}
+			else if (((WB>>>i)&1) == 1) {j = 4; k = humanIsWhite;}
+			else if (((BB>>>i)&1) == 1) {j = 4; k = 1 - humanIsWhite;}
+			else if (((WR>>>i)&1) == 1) {j = 2; k = humanIsWhite;}
+			else if (((BR>>>i)&1) == 1) {j = 2; k = 1 - humanIsWhite;}
+			else if (((WQ>>>i)&1) == 1) {j = 0; k = humanIsWhite;}
+			else if (((BQ>>>i)&1) == 1) {j = 0; k = 1 - humanIsWhite;}
+			else if (((WK>>>i)&1) == 1) {j = 1; k = humanIsWhite;}
+			else if (((BK>>>i)&1) == 1) {j = 1; k = 1 - humanIsWhite;}
+			
+			if (j != -1 && k != -1) {
+				/*
+				 * g.drawImage(Image image, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, ImageObserver observer)
+				 * d == destination, s == source image
+				 * humanIsWhite == 1, black_source_height == 0 pixels, white_source_height == 60 pixels 
+				 * PiecesIndex | Pawn == 300 Pixels | Knight == 180 pixels | Bishops == 240 pixels | Rooks == 120 pixels | Queens == 0 pixels | Kings == 60 pixels
+				 * 
+				 */
+				g.drawImage(pieceImage, (int)((i%8)*squareSize)+border, (int)((i/8)*squareSize)+border, (int)((i%8+1)*squareSize)+border, (int)((i/8+1)*squareSize)+border, (int)(j*60), (int)(k*60), (int)((j+1)*60), (int)((k+1)*60), null);
+				System.out.println("Piece Drawn");
+			}
+		}
 	}
 	public void drawBorders(Graphics g) {
-		
+		// g.fillRect3D(xPos, yPos, xSize, ySize, raised)
+		// Brpwm
+		g.setColor(new Color(100, 0, 0));
+		g.fill3DRect(0, 0, border, (int) (8 * squareSize) + border * 2, true);
+		g.fill3DRect((int) (8 * squareSize) + border, 0, border, (int) (8 * squareSize) + border * 2, true);
+		g.fill3DRect(border, 0, (int) (8 * squareSize), border, true);
+		g.fill3DRect(border, (int) (8 * squareSize) + border, (int) (8 * squareSize), border, true);
+		/*
+		 * Black
+		 * g.setColor(Color.BLACK);
+		 * g.fill3DRect((int) (8 * squareSize) + border, 0, border, border, true);
+		 * g.fill3DRect((int) (8 * squareSize) + border, border, border, border, true);\
+		 * g.fill3DRect(0, (int) (8 * squareSize) + border, border, border, true);
+		 * g.fill3DRect((int) (8 * squareSize) + 2 * border + 200, 0, border, border, true);
+		 * g.fill3DRect((int) (8 * squareSize) + 2 * border, + 200, (int) (8 * squareSize), border, border, true);
+		 */
+		// Green
+		g.setColor(new Color(0, 100, 0));
+		g.fill3DRect((int) (8 * squareSize) + 2 * border, 0, 200, border, true);
+		g.fill3DRect((int) (8 * squareSize) + 2 * border + 200, 0, border, (int) (8 * squareSize) + border * 2, true);
+		g.fill3DRect((int) (8 * squareSize) + 2 * border, (int) (8 * squareSize) + border, 200, border, true);
 	}
 	public static void newGame() {
 		BoardGeneration.initiateStandardBoard();
