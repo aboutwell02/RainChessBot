@@ -15,6 +15,7 @@ public class BoardGeneration {
 		Kings = k (white) / K (Black)
 		*/
 		long WP = 0L, WN = 0L, WB = 0L, WR = 0L, WQ = 0L, WK = 0L, BP = 0L, BN = 0L, BB = 0L, BR = 0L, BQ = 0L, BK = 0L;
+		
 		/* LONDON SYSTEM (DEBUGGING BITBOARDS)
 		String chessBoard[][] = {
 				{"R", " ", " ", "Q", " ", "R", "K", " "},
@@ -119,7 +120,8 @@ public class BoardGeneration {
 	}
 	
 	public static void arrayToBitboards(String[][] chessBoard, long WP, long WN, long WB, long WR, long WQ, long WK, long BP, long BN, long BB, long BR, long BQ, long BK) {
-		/* UNOPTIMIZED BITBOARD CONVERSION
+		/*
+		//UNOPTIMIZED BITBOARD CONVERSION
 		String binary;
 		for (int i = 0; i < 64; i++) {
 			binary = "0000000000000000000000000000000000000000000000000000000000000000";
@@ -153,6 +155,8 @@ public class BoardGeneration {
 		}
 		drawArray(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
 		*/
+		
+		
 		long binary = 0b01L; // this is 1 in binary
 		for (int i = 0; i < 64; i++) {
 			switch (chessBoard[i / 8][i % 8]) {
@@ -172,6 +176,7 @@ public class BoardGeneration {
 			binary = binary<<1;
 		}
 		drawArray(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
+		
 	}
 	
 	public static long convertStringToBitboard(String binary) {

@@ -32,10 +32,12 @@ public class UserInterface extends JPanel{
 				squareSize = (double) (Math.min(getHeight(),  getWidth() - 200 - border) - 2 * border) / 8;
 			}
 		});
+		
 		drawBorders(g);
 		drawBoard(g);
 		drawPieces(g);
 		//testPNGDraw(g);
+		//System.out.println("UI successfully generated");
 	}
 	public void testPNGDraw(Graphics g) {
 		Image pieceImage;
@@ -65,22 +67,50 @@ public class UserInterface extends JPanel{
 		
 		pieceImage = new ImageIcon("C:/Users/ajab0/git/RainChessBot/ChessBot/res/ChessPiecesArray.png").getImage();
 		System.out.println("Entering loop");
+		
+		/* Bitwise Operations Debugger
+		long test = 2L;
+		System.out.println(test);
+		if (((test>>1)& 1) == 1) {
+			long res = test>>1;
+			System.out.println("Success! " + res);
+		}
+		*/
+		
+		/* Visualizing Bitboards
+		System.out.println(WP);
+		System.out.println(WN);
+		System.out.println(WB);
+		System.out.println(WR);
+		System.out.println(WQ);
+		System.out.println(WK);
+		System.out.println(BP);
+		System.out.println(BN);
+		System.out.println(BB);
+		System.out.println(BR);
+		System.out.println(BQ);
+		System.out.println(BK);
+		*/
+		
+		// Every time window size is manipulated, for loop is called twice
 		for (int i = 0; i < 64; i++) {
-			System.out.println("Iteration " + i);
+			//System.out.println("Iteration " + (i+1));
 			int j = -1, k = -1;
-			if (((WP>>>i)&1) == 1) {j = 5; k = humanIsWhite;}
-			else if (((BP>>>i)&1) == 1) {j = 5; k = 1 - humanIsWhite;}
-			else if (((WN>>>i)&1) == 1) {j = 3; k = humanIsWhite;}
-			else if (((BN>>>i)&1) == 1) {j = 3; k = 1 - humanIsWhite;}
-			else if (((WB>>>i)&1) == 1) {j = 4; k = humanIsWhite;}
-			else if (((BB>>>i)&1) == 1) {j = 4; k = 1 - humanIsWhite;}
-			else if (((WR>>>i)&1) == 1) {j = 2; k = humanIsWhite;}
-			else if (((BR>>>i)&1) == 1) {j = 2; k = 1 - humanIsWhite;}
-			else if (((WQ>>>i)&1) == 1) {j = 0; k = humanIsWhite;}
-			else if (((BQ>>>i)&1) == 1) {j = 0; k = 1 - humanIsWhite;}
-			else if (((WK>>>i)&1) == 1) {j = 1; k = humanIsWhite;}
-			else if (((BK>>>i)&1) == 1) {j = 1; k = 1 - humanIsWhite;}
 			
+			if (((WP>>i)&1) == 1) {j = 5; k = humanIsWhite; System.out.println("Test If 1");}
+			if (((BP>>i)&1) == 1) {j = 5; k = 1 - humanIsWhite;}
+			if (((WN>>i)&1) == 1) {j = 3; k = humanIsWhite;}
+			if (((BN>>i)&1) == 1) {j = 3; k = 1 - humanIsWhite;}
+			if (((WB>>i)&1) == 1) {j = 4; k = humanIsWhite;}
+			if (((BB>>i)&1) == 1) {j = 4; k = 1 - humanIsWhite;}
+			if (((WR>>i)&1) == 1) {j = 2; k = humanIsWhite;}
+			if (((BR>>i)&1) == 1) {j = 2; k = 1 - humanIsWhite;}
+			if (((WQ>>i)&1) == 1) {j = 0; k = humanIsWhite;}
+			if (((BQ>>i)&1) == 1) {j = 0; k = 1 - humanIsWhite;}
+			if (((WK>>i)&1) == 1) {j = 1; k = humanIsWhite;}
+			if (((BK>>i)&1) == 1) {j = 1; k = 1 - humanIsWhite;}
+			
+			//System.out.println(BP);
 			if (j != -1 && k != -1) {
 				/*
 				 * g.drawImage(Image image, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, ImageObserver observer)
@@ -88,15 +118,16 @@ public class UserInterface extends JPanel{
 				 * humanIsWhite == 1, black_source_height == 0 pixels, white_source_height == 60 pixels 
 				 * PiecesIndex | Pawn == 300 Pixels | Knight == 180 pixels | Bishops == 240 pixels | Rooks == 120 pixels | Queens == 0 pixels | Kings == 60 pixels
 				 * 
-				 */
+				*/
 				g.drawImage(pieceImage, (int)((i%8)*squareSize)+border, (int)((i/8)*squareSize)+border, (int)((i%8+1)*squareSize)+border, (int)((i/8+1)*squareSize)+border, (int)(j*60), (int)(k*60), (int)((j+1)*60), (int)((k+1)*60), null);
 				System.out.println("Piece Drawn");
 			}
 		}
+		
 	}
 	public void drawBorders(Graphics g) {
 		// g.fillRect3D(xPos, yPos, xSize, ySize, raised)
-		// Brpwm
+		// Brown
 		g.setColor(new Color(100, 0, 0));
 		g.fill3DRect(0, 0, border, (int) (8 * squareSize) + border * 2, true);
 		g.fill3DRect((int) (8 * squareSize) + border, 0, border, (int) (8 * squareSize) + border * 2, true);
