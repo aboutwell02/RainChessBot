@@ -6,6 +6,7 @@ import javax.swing.*;
 
 public class UserInterface extends JPanel{
 	static long WP = 0L, WN = 0L, WB = 0L, WR = 0L, WQ = 0L, WK = 0L, BP = 0L, BN = 0L, BB = 0L, BR = 0L, BQ = 0L, BK = 0L;
+	static long WHITE_PIECES = 0L, BLACK_PIECES = 0L;
 	static long universalWP = 0L, universalWN = 0L, universalWB = 0L, universalWR = 0L, universalWQ = 0L, universalWK = 0L, universalBP = 0L, universalBN = 0L, universalBB = 0L, universalBR = 0L, universalBQ = 0L, universalBK = 0L;
 	static int humanIsWhite = 1;
 	static int rating = 0;
@@ -13,7 +14,7 @@ public class UserInterface extends JPanel{
 	static double squareSize = 64;
 	static JFrame javaF = new JFrame("RainChess Bot created by ame");
 	static UserInterface javaUI = new UserInterface(); // Must be declared as static so other classes can repaint
-	public static void main(String[] args) {
+	static void main(String[] args) {
 		javaF.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		javaF.add(javaUI);
 		javaF.setSize(757, 570);
@@ -44,13 +45,13 @@ public class UserInterface extends JPanel{
 		
 		pieceImage = new ImageIcon("C:/Users/ajab0/git/RainChessBot/ChessBot/res/ChessPiecesArray.png").getImage();
 		// Black Queen on a8
-		g.drawImage(pieceImage, (int)(border), (int)(border), (int)(border+squareSize), (int)(border+squareSize), 0, 0, 60, 60, null);
+		g.drawImage(pieceImage, (border), (border), (int)(border+squareSize), (int)(border+squareSize), 0, 0, 60, 60, null);
 		// Black Queen on d8
-		g.drawImage(pieceImage, (int)((4)*squareSize)+border, (int)(0)+border, (int)((4+1)*squareSize)+border, (int)((0+1)*squareSize)+border, 0, 0, 60, 60, null);
+		g.drawImage(pieceImage, (int)((4)*squareSize)+border, border, (int)((4+1)*squareSize)+border, (int)((1)*squareSize)+border, 0, 0, 60, 60, null);
 		//White Pawn on e2
-		g.drawImage(pieceImage, (int)((4)*squareSize)+border, (int)((6)*squareSize)+border, (int)((4+1)*squareSize)+border, (int)((6+1)*squareSize)+border, (5*60), (1*60), ((5+1)*60), ((1+1)*60), null);
+		g.drawImage(pieceImage, (int)((4)*squareSize)+border, (int)((6)*squareSize)+border, (int)((4+1)*squareSize)+border, (int)((6+1)*squareSize)+border, (5*60), 60, ((5+1)*60), ((1+1)*60), null);
 		// White King on e1
-		g.drawImage(pieceImage, (int)((4)*squareSize)+border, (int)((7)*squareSize)+border, (int)((4+1)*squareSize)+border, (int)((7+1)*squareSize)+border, ((1)*60), ((1)*60), ((1+1)*60), ((1+1)*60), null);
+		g.drawImage(pieceImage, (int)((4)*squareSize)+border, (int)((7)*squareSize)+border, (int)((4+1)*squareSize)+border, (int)((7+1)*squareSize)+border, 60, 60, ((1+1)*60), ((1+1)*60), null);
 
 	}
 	public void drawBoard(Graphics g) {
@@ -66,8 +67,9 @@ public class UserInterface extends JPanel{
 		Image pieceImage;
 		
 		pieceImage = new ImageIcon("C:/Users/ajab0/git/RainChessBot/ChessBot/res/ChessPiecesArray.png").getImage();
-		System.out.println("Entering loop");
-		
+		// Testing for CorrectBoard Generation
+		//BoardGeneration.drawArray(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
+		// TODO: Manipulate Piece Bitboards
 		/* Bitwise Operations Debugger
 		long test = 2L;
 		System.out.println(test);
@@ -91,13 +93,14 @@ public class UserInterface extends JPanel{
 		System.out.println(BQ);
 		System.out.println(BK);
 		*/
-		
+
+
 		// Every time window size is manipulated, for loop is called twice
 		for (int i = 0; i < 64; i++) {
 			//System.out.println("Iteration " + (i+1));
 			int j = -1, k = -1;
 			
-			if (((WP>>i)&1) == 1) {j = 5; k = humanIsWhite; System.out.println("Test If 1");}
+			if (((WP>>i)&1) == 1) {j = 5; k = humanIsWhite;}
 			if (((BP>>i)&1) == 1) {j = 5; k = 1 - humanIsWhite;}
 			if (((WN>>i)&1) == 1) {j = 3; k = humanIsWhite;}
 			if (((BN>>i)&1) == 1) {j = 3; k = 1 - humanIsWhite;}
@@ -119,8 +122,7 @@ public class UserInterface extends JPanel{
 				 * PiecesIndex | Pawn == 300 Pixels | Knight == 180 pixels | Bishops == 240 pixels | Rooks == 120 pixels | Queens == 0 pixels | Kings == 60 pixels
 				 * 
 				*/
-				g.drawImage(pieceImage, (int)((i%8)*squareSize)+border, (int)((i/8)*squareSize)+border, (int)((i%8+1)*squareSize)+border, (int)((i/8+1)*squareSize)+border, (int)(j*60), (int)(k*60), (int)((j+1)*60), (int)((k+1)*60), null);
-				System.out.println("Piece Drawn");
+				g.drawImage(pieceImage, (int)((i%8)*squareSize)+border, (int)((i/8)*squareSize)+border, (int)((i%8+1)*squareSize)+border, (int)((i/8+1)*squareSize)+border, (j*60), (k*60), ((j+1)*60), ((k+1)*60), null);
 			}
 		}
 		
@@ -150,6 +152,7 @@ public class UserInterface extends JPanel{
 	}
 	public static void newGame() {
 		BoardGeneration.initiateStandardBoard();
+		//Moves.validMovesWhite("", WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
 	}
 	
 }

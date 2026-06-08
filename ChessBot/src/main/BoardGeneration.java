@@ -3,7 +3,7 @@ package main;
 import java.util.Arrays;
 
 public class BoardGeneration {
-	
+
 	public static void initiateStandardBoard() {
 		/*
 		Capitals determines color:
@@ -14,9 +14,11 @@ public class BoardGeneration {
 		Queens = q (White) / Q (Black)
 		Kings = k (white) / K (Black)
 		*/
+
 		long WP = 0L, WN = 0L, WB = 0L, WR = 0L, WQ = 0L, WK = 0L, BP = 0L, BN = 0L, BB = 0L, BR = 0L, BQ = 0L, BK = 0L;
-		
-		/* LONDON SYSTEM (DEBUGGING BITBOARDS)
+
+		/*
+		// LONDON SYSTEM (DEBUGGING BITBOARDS)
 		String chessBoard[][] = {
 				{"R", " ", " ", "Q", " ", "R", "K", " "},
 				{"P", "P", "P", " ", " ", "P", "P", "P"},
@@ -30,6 +32,7 @@ public class BoardGeneration {
 		*/
 		
 		// Game Starting Position
+
 		String chessBoard[][] = {
 				{"R", "N", "B", "Q", "K", "B", "N", "R"},
 				{"P", "P", "P", "P", "P", "P", "P", "P"},
@@ -40,7 +43,7 @@ public class BoardGeneration {
 				{"p", "p", "p", "p", "p", "p", "p", "p"},
 				{"r", "n", "b", "q", "k", "b", "n", "r"}
 		};
-		
+
 		/* Bitboard examples:
 		 Black Rooks: "1000000100000000000000000000000000000000000000000000000000000000"
 		 White Pawns: "0000000000000000000000000000000000000000000000001111111100000000"
@@ -84,7 +87,7 @@ public class BoardGeneration {
 		int random4a = (int) (Math.random() * 5); // 3 squares have been filled
 		int counter = 0;
 		int loop = 0;
-		while (counter - 1< random4a) {
+		while (counter - 1 < random4a) {
 			if (" ".equals(chessBoard[0][loop])) {counter++;}
 			loop++;
 		}
@@ -176,7 +179,18 @@ public class BoardGeneration {
 			binary = binary<<1;
 		}
 		drawArray(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
-		
+		UserInterface.WP = WP;
+		UserInterface.WN = WN;
+		UserInterface.WB = WB;
+		UserInterface.WR = WR;
+		UserInterface.WQ = WQ;
+		UserInterface.WK = WK;
+		UserInterface.BP = BP;
+		UserInterface.BN = BN;
+		UserInterface.BB = BB;
+		UserInterface.BR = BR;
+		UserInterface.BQ = BQ;
+		UserInterface.BK = BK;
 	}
 	
 	public static long convertStringToBitboard(String binary) {
