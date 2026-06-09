@@ -33,7 +33,50 @@ public class UserInterface extends JPanel{
 				squareSize = (double) (Math.min(getHeight(),  getWidth() - 200 - border) - 2 * border) / 8;
 			}
 		});
-		
+
+		/* TESTING BITBOARD TRAVERSAL AND NOTATION
+		long traversal = 281474976645120L;
+		for (int i = 0; i < 64; i++) {
+			if (((traversal >> i) & 1) == 0) {
+				System.out.println("1 is at index " + i);
+			}
+		}
+		long test = 922337203685477587L;
+		long testWhitePawns = 65280L;
+		int file1, file2;
+		String letter1 = "", letter2 = "";
+		for (int i = 0; i < 64; i++) {
+			if (((testWhitePawns >> i)&1) == 1) {
+				file1 = ((i % 8));
+				letter1 = switch (file1) {
+					case 0 -> "a";
+					case 1 -> "b";
+					case 2 -> "c";
+					case 3 -> "d";
+					case 4 -> "e";
+					case 5 -> "f";
+					case 6 -> "g";
+					case 7 -> "h";
+					default -> letter1;
+				};
+				file2 = ((i % 8));
+				letter2 = switch (file2) {
+					case 0 -> "a";
+					case 1 -> "b";
+					case 2 -> "c";
+					case 3-> "d";
+					case 4 -> "e";
+					case 5 -> "f";
+					case 6 -> "g";
+					case 7 -> "h";
+					default -> letter2;
+				};
+
+				System.out.println("Starting Position: " + letter1 + ", " + ((i % 8) + 1) + " | Ending Position: " + letter2 + ", " + ((i % 8) + 2));
+			}
+
+		}
+		*/
 		drawBorders(g);
 		drawBoard(g);
 		drawPieces(g);
@@ -152,7 +195,7 @@ public class UserInterface extends JPanel{
 	}
 	public static void newGame() {
 		BoardGeneration.initiateStandardBoard();
-		//Moves.validMovesWhite("", WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
+		Moves.validMovesWhite("", WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
 	}
 	
 }

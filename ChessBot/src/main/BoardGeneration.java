@@ -30,9 +30,22 @@ public class BoardGeneration {
 				{"r", " ", " ", "q", "k", " ", " ", "r"}
 		};
 		*/
-		
+
+		//TESTING MOVE LIST METHODS
+		String chessBoard[][] = {
+			{"P", "P", "P", "P", "P", "P", "P", "P"},
+			{"p", "p", "p", "p", "p", "p", "p", "p"},
+			{"P", "P", "P", "P", "P", "P", "P", "P"},
+			{"p", "p", "p", "p", "p", "p", "p", "p"},
+			{"P", "P", "P", "P", "P", "P", "P", "P"},
+			{"p", "p", "p", "p", "p", "p", "p", "p"},
+			{"P", "P", "P", "P", "P", "P", "P", "P"},
+			{"p", "p", "p", "p", "p", "p", "p", "p"}
+		};
+
 		// Game Starting Position
 
+		/*
 		String chessBoard[][] = {
 				{"R", "N", "B", "Q", "K", "B", "N", "R"},
 				{"P", "P", "P", "P", "P", "P", "P", "P"},
@@ -43,7 +56,7 @@ public class BoardGeneration {
 				{"p", "p", "p", "p", "p", "p", "p", "p"},
 				{"r", "n", "b", "q", "k", "b", "n", "r"}
 		};
-
+		*/
 		/* Bitboard examples:
 		 Black Rooks: "1000000100000000000000000000000000000000000000000000000000000000"
 		 White Pawns: "0000000000000000000000000000000000000000000000001111111100000000"
