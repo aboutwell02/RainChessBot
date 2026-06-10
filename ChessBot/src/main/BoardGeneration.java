@@ -16,21 +16,31 @@ public class BoardGeneration {
 		*/
 
 		long WP = 0L, WN = 0L, WB = 0L, WR = 0L, WQ = 0L, WK = 0L, BP = 0L, BN = 0L, BB = 0L, BR = 0L, BQ = 0L, BK = 0L;
-
 		/*
 		// LONDON SYSTEM (DEBUGGING BITBOARDS)
 		String chessBoard[][] = {
-				{"R", " ", " ", "Q", " ", "R", "K", " "},
+				{"R", " ", " ", " ", " ", "R", "K", " "},
 				{"P", "P", "P", " ", " ", "P", "P", "P"},
-				{" ", " ", "N", " ", "P", "N", " ", " "},
-				{" ", " ", " ", "P", " ", " ", " ", " "},
+				{" ", " ", "N", " ", "Q", "N", " ", " "},
+				{" ", " ", " ", "P", "P", " ", " ", " "},
 				{" ", "B", " ", "p", " ", "b", "B", " "},
-				{" ", " ", "p", "b", "p", "n", " ", " "},
-				{"p", "p", " ", "n", " ", "p", "p", "p"},
-				{"r", " ", " ", "q", "k", " ", " ", "r"}
+				{"p", " ", "p", " ", "p", "n", " ", "p"},
+				{" ", "p", " ", "n", " ", "p", "p", " "},
+				{"r", " ", " ", "q", " ", "r", "k", " "}
 		};
 		*/
-
+		// EMPTY BOARD
+		String chessBoard[][] = {
+				{" ", " ", " ", " ", " ", " ", " ", " "},
+				{" ", "P", " ", " ", " ", "P", " ", " "},
+				{" ", " ", "p", " ", "P", "P", "p", " "},
+				{"P", " ", " ", " ", " ", "p", "p", " "},
+				{" ", "p", " ", "P", " ", " ", " ", " "},
+				{" ", "P", " ", "P", "p", "P", " ", "P"},
+				{" ", " ", "p", " ", " ", " ", "p", " "},
+				{" ", " ", " ", " ", " ", " ", " ", " "}
+		};
+		/*
 		//TESTING MOVE LIST METHODS
 		String chessBoard[][] = {
 			{"P", "P", "P", "P", "P", "P", "P", "P"},
@@ -42,10 +52,9 @@ public class BoardGeneration {
 			{"P", "P", "P", "P", "P", "P", "P", "P"},
 			{"p", "p", "p", "p", "p", "p", "p", "p"}
 		};
-
-		// Game Starting Position
-
+		*/
 		/*
+		// Game Starting Position
 		String chessBoard[][] = {
 				{"R", "N", "B", "Q", "K", "B", "N", "R"},
 				{"P", "P", "P", "P", "P", "P", "P", "P"},
