@@ -198,7 +198,6 @@ public class Moves {
         }
     }
     public static void methodB(int loopLength, String history, long WP, long BP) {
-        int index;
         String list = "";
         for (int loop = 0; loop < loopLength; loop++) {
             long PAWN_MOVES = (WP >> 7) & BLACK_PIECES &~ RANK_8 &~ FILE_A; // Pawn captures to the RIGHT
@@ -206,18 +205,18 @@ public class Moves {
             //System.out.println("Before RIGHT CAPTURES Loop: " + possibility);
             while (possibility != 0) {
                 //drawBitboard(possibility);
-                index = Long.numberOfTrailingZeros(possibility);
+                int index = Long.numberOfTrailingZeros(possibility);
                 list += "" + ((index % 8) - 1) + ((index / 8) + 1) + (index % 8) + (index / 8); // x1y1 = 1 left & 1 down
                 PAWN_MOVES &=~ (possibility);
                 possibility = PAWN_MOVES & -PAWN_MOVES;
             }
             //System.out.println("After RIGHT CAPTURE Loop: " + possibility);
-            PAWN_MOVES = (WP >> 9) & BLACK_PIECES &~ RANK_8 &~ 0x8080808080808080L; // Pawn captures to the LEFT
+            PAWN_MOVES = (WP >> 9) & BLACK_PIECES &~ RANK_8 &~ FILE_H; // Pawn captures to the LEFT
             possibility = PAWN_MOVES & -PAWN_MOVES;
             //System.out.println("Before LEFT CAPTURES Loop: " + possibility);
             while (possibility != 0) {
                 //drawBitboard(possibility);
-                index = Long.numberOfTrailingZeros(possibility);
+                int index = Long.numberOfTrailingZeros(possibility);
                 list += "" +((index % 8) + 1) + ((index / 8) + 1) + (index % 8) + (index / 8); // x1y1 = 1 right & 1 down
                 PAWN_MOVES &=~ (possibility);
                 possibility = PAWN_MOVES & -PAWN_MOVES;
@@ -225,14 +224,12 @@ public class Moves {
             //System.out.println("After LEFT CAPTURE Loop: " + possibility);
             PAWN_MOVES = (WP >> 8) & EMPTY &~ RANK_8; // Pawn moves FORWARD ONE square
             possibility = PAWN_MOVES &- PAWN_MOVES;
-            System.out.println("Before FORWARD STEP Loop: " + possibility);
             while (possibility != 0) {
                 //drawBitboard(possibility);
-                System.out.println(possibility);
-                index = Long.numberOfTrailingZeros(possibility);
-                list += "" + (index % 8) + ((index / 8) + 1) + (index % 8) + ((index / 8)); // x1y1 = same & 1 down
+                int index = Long.numberOfTrailingZeros(possibility);
+                list += "" + ((index % 8)) + ((index / 8) + 1) + (index % 8) + (index / 8); // x1y1 = same & 1 down
                 PAWN_MOVES &=~ (possibility);
-                possibility = PAWN_MOVES;
+                possibility = PAWN_MOVES & -PAWN_MOVES;
             }
             //System.out.println("After FORWARD STEP Loop: " + possibility);
             PAWN_MOVES = (WP >> 16) & EMPTY & (EMPTY >> 8) & RANK_4; // Pawn moves FORWARD TWO squares as its first move
@@ -240,7 +237,7 @@ public class Moves {
             //System.out.println("Before TWO STEP Loop: " + possibility);
             while (possibility != 0) {
                 //drawBitboard(possibility);
-                index = Long.numberOfTrailingZeros(possibility);
+                int index = Long.numberOfTrailingZeros(possibility);
                 list += "" + (index % 8) + ((index / 8) + 2) + (index % 8) + (index / 8); // x1y1 = same & 2 down
                 PAWN_MOVES &=~ (possibility);
                 possibility = PAWN_MOVES & -PAWN_MOVES;
@@ -251,7 +248,7 @@ public class Moves {
             //System.out.println("Before RIGHT PROMOTION Loop: " + possibility);
             while (possibility != 0) {
                 //drawBitboard(possibility);
-                index = Long.numberOfTrailingZeros(possibility);
+                int index = Long.numberOfTrailingZeros(possibility);
                 list += "" + ((index % 8) - 1) + (index % 8) + "QP" + ((index % 8) - 1) + (index % 8) + "RP" + ((index % 8) - 1) + (index % 8) + "BP" + ((index % 8) - 1) + (index % 8) + "NP"; // x1 = 1 left
                 PAWN_MOVES &=~ (possibility);
                 possibility = PAWN_MOVES & -PAWN_MOVES;
@@ -262,7 +259,7 @@ public class Moves {
             //System.out.println("Before LEFT PROMOTION Loop: " + possibility);
             while (possibility != 0) {
                 //drawBitboard(possibility);
-                index = Long.numberOfTrailingZeros(possibility);
+                int index = Long.numberOfTrailingZeros(possibility);
                 list += "" + (index % 8 + 1) + (index % 8) + "QP" + (index % 8 + 1) + (index % 8) + "RP" + (index % 8 + 1) + (index % 8) + "BP" + (index % 8 + 1) + (index % 8) + "NP"; // x1 = 1 right
                 PAWN_MOVES &=~ (possibility);
                 possibility = PAWN_MOVES & -PAWN_MOVES;
@@ -273,7 +270,7 @@ public class Moves {
             //System.out.println("Before FORWARD PROMOTION Loop: " + possibility);
             while (possibility != 0) {
                 //drawBitboard(possibility);
-                index = Long.numberOfTrailingZeros(possibility);
+                int index = Long.numberOfTrailingZeros(possibility);
                 list += "" + (index % 8) + (index % 8) + "QP" + (index % 8) + (index % 8) + "RP" + (index % 8) + (index % 8) + "BP" + (index % 8) + (index % 8) + "NP"; // x1 = same
                 PAWN_MOVES &=~ (possibility);
                 possibility = PAWN_MOVES & -PAWN_MOVES;
@@ -281,24 +278,21 @@ public class Moves {
             //System.out.println("After FORWARD PROMOTION Loop: " + possibility);
             //System.out.println(list);
             // TODO: Add En Passant Rules
-            // EN PASSANT "x1x2 SPACE E"
-            if (history.length() >= 4) {
-                System.out.println("History.charAt(history.length()) - 1) == " + history.charAt(history.length() - 1));
-                System.out.println("history.charAt(history.length() - 3) == " + history.charAt(history.length() - 3));
-                if (history.charAt(history.length() - 1) == history.charAt(history.length() - 3) && Math.abs(history.charAt(history.length() - 2) - history.charAt(history.length() - 4)) == 2) {
-
-                    int file = history.charAt(history.length() - 1) - '0';
+            // EN PASSANT "x1x2 UNDERSCORE E"
+            if (history.length() == 4) {
+                if (history.charAt(history.length() - 2) == history.charAt(history.length() - 4) && Math.abs(history.charAt(history.length() - 1) - history.charAt(history.length() - 3)) == 2) {
+                    int file = history.charAt(history.length() - 4) - '0';
                     possibility = (WP << 1) & BP & RANK_5 &~ FILE_A & FileMasks[file]; // En passant RIGHT
                     System.out.println("Right capture en passant at: " + possibility);
                     if (possibility != 0) {
-                        index = Long.numberOfTrailingZeros(possibility);
-                        list += "" + ((index % 8) - 1) + (index % 8) + "E"; // x1 = 1 left
+                        int index = Long.numberOfTrailingZeros(possibility);
+                        list += "" + ((index % 8) - 1) + (index % 8) + "_" + "E"; // x1 = 1 left
                     }
                     possibility = (WP >> 1) & BP & RANK_5 &~ FILE_H & FileMasks[file]; // En passant LEFT
                     System.out.println("Left capture en passant at: " + possibility);
                     if (possibility != 0) {
-                        index = Long.numberOfTrailingZeros(possibility);
-                        list += "" + ((index % 8) + 1) + (index % 8) + "E"; // x1 = 1 right
+                        int index = Long.numberOfTrailingZeros(possibility);
+                        list += "" + ((index % 8) + 1) + (index % 8) + "_" + "E"; // x1 = 1 right
                     }
                 }
             }
