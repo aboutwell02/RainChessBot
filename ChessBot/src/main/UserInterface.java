@@ -195,7 +195,7 @@ public class UserInterface extends JPanel{
 	}
 	public static void newGame() {
 		BoardGeneration.initiateStandardBoard();
-		Moves.validMovesWhite("", WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
+		Moves.validMovesWhite("3111", WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
 	}
 	
 }
