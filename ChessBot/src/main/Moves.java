@@ -5,7 +5,7 @@ import java.util.Arrays;
 public class Moves {
     // Edges of board for logic reasons
     static long FILE_A = 72340172838076673L; //  1000000010000000100000001000000010000000100000001000000010000000
-    static long FILE_H = 9187201950435737472L; //  0000000100000001000000010000000100000001000000010000000100000001
+    static long FILE_H = 0x8080808080808080L; //  0000000100000001000000010000000100000001000000010000000100000001
     static long FILE_AB = 217020518514230019L; // 1100000011000000110000001100000011000000110000001100000011000000
     static long FILE_GH = 4557430888798830400L; // 0000001100000011000000110000001100000011000000110000001100000011
 
@@ -51,90 +51,6 @@ public class Moves {
     }
 
     public static String possiblePawnWhite(String history, long WP, long BP) {
-        /*
-        String list = "";
-        // x1y1x2y2 format
-        // Movement Visualization
-        00000000000000000000000000000000000000000000|e3|0000000|e2|00000000000
-        0 0 0 0 0 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 0 0 0 0 0 0
-        0 0 0 0 e3 0 0 0
-        0 0 0 0 e2 0 0 0
-        0 0 0 0 0 0 0 0
-        e2 Pawn Moves forward 1 space to e3
-        i = 12
-        e2: x1: 4, y1 = 2 | ((12  % 8) + 1) = 5 FILE E = 5 | ((12 / 8) + 1) RANK 2 = 2
-        e3: x2 = 4 y2 = 3 | (12 % 8 + 1) = 5 FILE E = 5 | (12 / 8) + 2) RANK 3 = 3
-
-        long PAWN_MOVES = (WP >> 7) & BLACK_PIECES &~ RANK_8 *~ FILE_A; // Pawn captures to the right and not on rank 8 and not on file A
-        for (int i = Long.numberOfTrailingZeros(PAWN_MOVES); i < 64 -  Long.numberOfTrailingZeros(PAWN_MOVES); i++) {
-            if (((PAWN_MOVES >> i) & 1) == 1) {list += "" + ((i / 8) + 1) + ((i % 8) - 1) + (i / 8) + (i % 8);} // Adds x1(1 Rank Down)y1(1 File Left)x2(Destination x)y2(Destination y)
-        }
-
-        PAWN_MOVES = (WP >> 9) & BLACK_PIECES &~ RANK_8 *~ FILE_H; // Pawn captures to the left and not on rank 8 and not on file H
-        for (int i = Long.numberOfTrailingZeros(PAWN_MOVES); i < 64 -  Long.numberOfTrailingZeros(PAWN_MOVES); i++) {
-            if (((PAWN_MOVES >> i) & 1) == 1) {list += "" + ((i / 8) + 1) + ((i % 8) + 1) + (i / 8) + (i % 8);}
-        }
-
-        PAWN_MOVES = (WP >> 8) & EMPTY &~ RANK_8; // Pawn moves forward 1 and not on rank 8
-        for (int i = Long.numberOfTrailingZeros(PAWN_MOVES); i < 64 -  Long.numberOfTrailingZeros(PAWN_MOVES); i++) {
-            if (((PAWN_MOVES >> i) & 1) == 1) {list += "" + ((i / 8) + 1) + ((i % 8) + 1) + (i / 8) + (i % 8);}
-        }
-
-        PAWN_MOVES = (WP >> 16) & EMPTY & (EMPTY >> 8) & RANK_4; // Pawn moves two steps from starting position only onto rank 4
-        for (int i = Long.numberOfTrailingZeros(PAWN_MOVES); i < 64 -  Long.numberOfTrailingZeros(PAWN_MOVES); i++) {
-            if (((PAWN_MOVES >> i) & 1) == 1) {list += "" + ((i / 8) + 2) + (i % 8) + (i / 8) + (i % 8);}
-        }
-
-        // Pawn Promotion Cases
-        PAWN_MOVES = (WP >> 7) & BLACK_PIECES & RANK_8 &~ FILE_A; // Pawn Captures black piece to the RIGHT on rank 8 and not file A and PROMOTES
-        for (int i = Long.numberOfTrailingZeros(PAWN_MOVES); i < 64 -  Long.numberOfTrailingZeros(PAWN_MOVES); i++) {
-            if (((PAWN_MOVES >> i) & 1) == 1) {
-                // VISUALISATION
-                0000000|h8|000000|g7|0000000000000000000000000000000000000000000000000
-                a8 0 0 d8 0 0 0 h8
-                0 b7 0 d7 0 0 g7 0
-                0 0 0 0 0 0 0 0
-                0 0 0 0 0 0 0 0
-                0 0 0 0 0 0 0 0
-                0 0 0 0 0 0 0 0
-                0 0 0 0 0 0 0 0
-                0 0 0 0 0 0 0 0
-                g7 White Pawn Takes Black Piece on h8 and Promotes to Queen
-                i = 63 (h8)
-                g7: x1 = ((63 % 8) - 1 = 7 - 1 = 6
-                h8: x2 = (63 & 8) = 7
-                PRODUCT: x1x2(PROMOTION)P 67QP
-                b7 white pawn takes black piece on a8 and promotes to knight
-                i = 56
-                b7: x1 = (56 % 8) = 0 + 1 = 1
-                a8: x2 = (56 % 8) = 0
-                PRODUCT: 10NP
-                pawn moves from d7 to d8 and promotes to rook
-                i = 51
-                d7: x1 = (51 % 8) = 3
-                d8: x2 = (51 % 8) = 3
-                PRODUCT: 33RP
-
-
-                list += "" + ((i % 8) - 1) + (i % 8) + "QP" + ((i % 8) - 1) + (i % 8) + "RP" + ((i % 8) - 1) + (i % 8) + "BP" + ((i % 8) - 1) + (i % 8) + "NP";
-            }
-        }
-        PAWN_MOVES = (WP >> 9) & BLACK_PIECES & RANK_8 &~ FILE_H; // Pawn Captures black piece to the LEFT on rank 8, not file H, and PROMOTES
-        for (int i = Long.numberOfTrailingZeros(PAWN_MOVES); i < 64 - Long.numberOfTrailingZeros(PAWN_MOVES); i++) {
-            if (((PAWN_MOVES >> i) & 1 ) == 1) {list += "" + (i % 8 + 1) + (i % 8) + "QP" + (i % 8 + 1) + (i % 8) + "RP" + (i % 8 + 1) + (i % 8) + "BP" + (i % 8 + 1) + (i % 8) + "NP";}
-        }
-        PAWN_MOVES = (WP >> 8) & EMPTY & RANK_8; // Pawn Moves forward to last rank and promotes
-        for (int i = Long.numberOfTrailingZeros(PAWN_MOVES); i < 64 - Long.numberOfTrailingZeros(PAWN_MOVES); i++) {
-            if (((PAWN_MOVES >> i) & 1) == 1) {list += "" + (i % 8) + (i % 8) + "QP" + (i % 8) + (i % 8) + "RP" + (i % 8) + (i % 8) + "BP" + (i % 8) + (i % 8) + "NP";}
-        }
-        // x1x2 SPACE (E)
-        return list;
-        */
-
         // OPTIMIZED METHOD FOR VALID MOVE SEARCH (~4 times faster than previous method)
         int index;
         String list = "";
@@ -146,31 +62,31 @@ public class Moves {
         while (possibility != 0) {
             //drawBitboard(possibility);
             index = Long.numberOfTrailingZeros(possibility);
-            list += "" + ((index / 8) + 1) + ((index % 8) - 1) + (index / 8) + (index % 8);
+            list += "" + ((index % 8) - 1) + ((index / 8) + 1) + (index % 8) + (index / 8); // x1y1 = 1 left & 1 down
             PAWN_MOVES &= ~(possibility);
             possibility = PAWN_MOVES & -PAWN_MOVES;
         }
         //System.out.println("After RIGHT CAPTURE Loop: " + possibility);
+        // TODO: LEFT CAPTURES NOT BEING SEEN
         PAWN_MOVES = (WP >> 9) & BLACK_PIECES & ~RANK_8 & ~FILE_H; // Pawn captures to the LEFT
         possibility = PAWN_MOVES & -PAWN_MOVES;
         //System.out.println("Debugging test");
-        System.out.println("Before LEFT CAPTURES Loop: " + possibility);
+        //System.out.println("Before LEFT CAPTURES Loop: " + possibility);
         while (possibility != 0) {
             //drawBitboard(possibility);
             index = Long.numberOfTrailingZeros(possibility);
-            list += "" + ((index / 8) + 1) + ((index % 8) + 1) + (index / 8) + (index % 8);
+            list += "" + ((index % 8) + 1) + ((index / 8) + 1) + (index % 8) + (index / 8); // x1y1 = 1 right & 1 down
             PAWN_MOVES &= ~(possibility);
             possibility = PAWN_MOVES & -PAWN_MOVES;
         }
         //System.out.println("After LEFT CAPTURE Loop: " + possibility);
-        // TODO: LEFT CAPTURES NOT BEING SEEN
         PAWN_MOVES = (WP >> 8) & EMPTY & ~RANK_8; // Pawn moves FORWARD ONE square
         possibility = PAWN_MOVES & -PAWN_MOVES;
         //System.out.println("Before FORWARD STEP Loop: " + possibility);
         while (possibility != 0) {
             //drawBitboard(possibility);
             index = Long.numberOfTrailingZeros(possibility);
-            list += "" + ((index / 8) + 1) + ((index % 8)) + (index / 8) + (index % 8);
+            list += "" + ((index % 8)) + ((index / 8) + 1) + (index % 8) + (index / 8); // x1y1 = same & 1 down
             PAWN_MOVES &= ~(possibility);
             possibility = PAWN_MOVES;
         }
@@ -181,20 +97,21 @@ public class Moves {
         while (possibility != 0) {
             //drawBitboard(possibility);
             index = Long.numberOfTrailingZeros(possibility);
-            list += "" + ((index / 8) + 2) + (index % 8) + (index / 8) + (index % 8);
+            list += "" + (index % 8) + ((index / 8) + 2) + (index % 8) + (index / 8); // x1y1 = same & 2 down
             PAWN_MOVES &= ~(possibility);
             possibility = PAWN_MOVES & -PAWN_MOVES;
         }
         //System.out.println("After TWO STEP Loop: " + possibility);
 
         // PAWN PROMOTIONS
+        // x1x2(PROMOTION)P
         PAWN_MOVES = (WP >> 7) & BLACK_PIECES & RANK_8 & ~FILE_A; // Pawn captures RIGHT and PROMOTES
         possibility = PAWN_MOVES;
         //System.out.println("Before RIGHT PROMOTION Loop: " + possibility);
         while (possibility != 0) {
             //drawBitboard(possibility);
             index = Long.numberOfTrailingZeros(possibility);
-            list += "" + ((index % 8) - 1) + (index % 8) + "QP" + ((index % 8) - 1) + (index % 8) + "RP" + ((index % 8) - 1) + (index % 8) + "BP" + ((index % 8) - 1) + (index % 8) + "NP";
+            list += "" + ((index % 8) - 1) + (index % 8) + "QP" + ((index % 8) - 1) + (index % 8) + "RP" + ((index % 8) - 1) + (index % 8) + "BP" + ((index % 8) - 1) + (index % 8) + "NP"; // x1 = 1 left
             PAWN_MOVES &= ~(possibility);
             possibility = PAWN_MOVES & -PAWN_MOVES;
         }
@@ -205,7 +122,7 @@ public class Moves {
         while (possibility != 0) {
             //drawBitboard(possibility);
             index = Long.numberOfTrailingZeros(possibility);
-            list += "" + (index % 8 + 1) + (index % 8) + "QP" + (index % 8 + 1) + (index % 8) + "RP" + (index % 8 + 1) + (index % 8) + "BP" + (index % 8 + 1) + (index % 8) + "NP";
+            list += "" + ((index % 8) + 1) + (index % 8) + "QP" + ((index % 8) + 1) + (index % 8) + "RP" + ((index % 8) + 1) + (index % 8) + "BP" + ((index % 8) + 1) + (index % 8) + "NP"; // x1 = 1 right
             PAWN_MOVES &= ~(possibility);
             possibility = PAWN_MOVES & -PAWN_MOVES;
         }
@@ -216,7 +133,7 @@ public class Moves {
         while (possibility != 0) {
             //drawBitboard(possibility);
             index = Long.numberOfTrailingZeros(possibility);
-            list += "" + (index % 8) + (index % 8) + "QP" + (index % 8) + (index % 8) + "RP" + (index % 8) + (index % 8) + "BP" + (index % 8) + (index % 8) + "NP";
+            list += "" + (index % 8) + (index % 8) + "QP" + (index % 8) + (index % 8) + "RP" + (index % 8) + (index % 8) + "BP" + (index % 8) + (index % 8) + "NP"; // x1 = same
             PAWN_MOVES &= ~(possibility);
             possibility = PAWN_MOVES & -PAWN_MOVES;}
         //System.out.println("After FORWARD PROMOTION Loop: " + possibility);
@@ -239,7 +156,7 @@ public class Moves {
         }
     }
     public static void timeExperiment(String history, long WP, long BP) {
-        int loopLength = 100;
+        int loopLength = 1;
         long startTime = System.currentTimeMillis();
        // System.out.println("That took " + (endTime - startTime) + " milliseconds for the Method A.");
         methodB(loopLength, history, WP, BP);
@@ -290,29 +207,30 @@ public class Moves {
             while (possibility != 0) {
                 //drawBitboard(possibility);
                 index = Long.numberOfTrailingZeros(possibility);
-                list += "" + ((index / 8) + 1) + ((index % 8) - 1) + (index / 8) + (index % 8);
+                list += "" + ((index % 8) - 1) + ((index / 8) + 1) + (index % 8) + (index / 8); // x1y1 = 1 left & 1 down
                 PAWN_MOVES &=~ (possibility);
                 possibility = PAWN_MOVES & -PAWN_MOVES;
             }
             //System.out.println("After RIGHT CAPTURE Loop: " + possibility);
-            PAWN_MOVES = (WP >> 9) & BLACK_PIECES &~ RANK_8 &~ FILE_H; // Pawn captures to the LEFT
+            PAWN_MOVES = (WP >> 9) & BLACK_PIECES &~ RANK_8 &~ 0x8080808080808080L; // Pawn captures to the LEFT
             possibility = PAWN_MOVES & -PAWN_MOVES;
             //System.out.println("Before LEFT CAPTURES Loop: " + possibility);
             while (possibility != 0) {
                 //drawBitboard(possibility);
                 index = Long.numberOfTrailingZeros(possibility);
-                list += "" +((index / 8) + 1) + ((index % 8) + 1) + (index / 8) + (index % 8);
+                list += "" +((index % 8) + 1) + ((index / 8) + 1) + (index % 8) + (index / 8); // x1y1 = 1 right & 1 down
                 PAWN_MOVES &=~ (possibility);
                 possibility = PAWN_MOVES & -PAWN_MOVES;
             }
             //System.out.println("After LEFT CAPTURE Loop: " + possibility);
             PAWN_MOVES = (WP >> 8) & EMPTY &~ RANK_8; // Pawn moves FORWARD ONE square
             possibility = PAWN_MOVES &- PAWN_MOVES;
-            //System.out.println("Before FORWARD STEP Loop: " + possibility);
+            System.out.println("Before FORWARD STEP Loop: " + possibility);
             while (possibility != 0) {
                 //drawBitboard(possibility);
+                System.out.println(possibility);
                 index = Long.numberOfTrailingZeros(possibility);
-                list += "" + ((index / 8) + 1) + ((index % 8)) + (index / 8) + (index % 8);
+                list += "" + (index % 8) + ((index / 8) + 1) + (index % 8) + ((index / 8)); // x1y1 = same & 1 down
                 PAWN_MOVES &=~ (possibility);
                 possibility = PAWN_MOVES;
             }
@@ -323,7 +241,7 @@ public class Moves {
             while (possibility != 0) {
                 //drawBitboard(possibility);
                 index = Long.numberOfTrailingZeros(possibility);
-                list += "" + ((index / 8) + 2) + (index % 8) + (index / 8) + (index % 8);
+                list += "" + (index % 8) + ((index / 8) + 2) + (index % 8) + (index / 8); // x1y1 = same & 2 down
                 PAWN_MOVES &=~ (possibility);
                 possibility = PAWN_MOVES & -PAWN_MOVES;
             }
@@ -334,7 +252,7 @@ public class Moves {
             while (possibility != 0) {
                 //drawBitboard(possibility);
                 index = Long.numberOfTrailingZeros(possibility);
-                list += "" + ((index % 8) - 1) + (index % 8) + "QP" + ((index % 8) - 1) + (index % 8) + "RP" + ((index % 8) - 1) + (index % 8) + "BP" + ((index % 8) - 1) + (index % 8) + "NP";
+                list += "" + ((index % 8) - 1) + (index % 8) + "QP" + ((index % 8) - 1) + (index % 8) + "RP" + ((index % 8) - 1) + (index % 8) + "BP" + ((index % 8) - 1) + (index % 8) + "NP"; // x1 = 1 left
                 PAWN_MOVES &=~ (possibility);
                 possibility = PAWN_MOVES & -PAWN_MOVES;
             }
@@ -345,7 +263,7 @@ public class Moves {
             while (possibility != 0) {
                 //drawBitboard(possibility);
                 index = Long.numberOfTrailingZeros(possibility);
-                list += "" + (index % 8 + 1) + (index % 8) + "QP" + (index % 8 + 1) + (index % 8) + "RP" + (index % 8 + 1) + (index % 8) + "BP" + (index % 8 + 1) + (index % 8) + "NP";
+                list += "" + (index % 8 + 1) + (index % 8) + "QP" + (index % 8 + 1) + (index % 8) + "RP" + (index % 8 + 1) + (index % 8) + "BP" + (index % 8 + 1) + (index % 8) + "NP"; // x1 = 1 right
                 PAWN_MOVES &=~ (possibility);
                 possibility = PAWN_MOVES & -PAWN_MOVES;
             }
@@ -356,7 +274,7 @@ public class Moves {
             while (possibility != 0) {
                 //drawBitboard(possibility);
                 index = Long.numberOfTrailingZeros(possibility);
-                list += "" + (index % 8) + (index % 8) + "QP" + (index % 8) + (index % 8) + "RP" + (index % 8) + (index % 8) + "BP" + (index % 8) + (index % 8) + "NP";
+                list += "" + (index % 8) + (index % 8) + "QP" + (index % 8) + (index % 8) + "RP" + (index % 8) + (index % 8) + "BP" + (index % 8) + (index % 8) + "NP"; // x1 = same
                 PAWN_MOVES &=~ (possibility);
                 possibility = PAWN_MOVES & -PAWN_MOVES;
             }
@@ -374,18 +292,18 @@ public class Moves {
                     System.out.println("Right capture en passant at: " + possibility);
                     if (possibility != 0) {
                         index = Long.numberOfTrailingZeros(possibility);
-                        list += "" + ((index % 8) - 1) + (index % 8) + "E";
+                        list += "" + ((index % 8) - 1) + (index % 8) + "E"; // x1 = 1 left
                     }
                     possibility = (WP >> 1) & BP & RANK_5 &~ FILE_H & FileMasks[file]; // En passant LEFT
                     System.out.println("Left capture en passant at: " + possibility);
                     if (possibility != 0) {
                         index = Long.numberOfTrailingZeros(possibility);
-                        list += "" + ((index % 8) + 1) + (index % 8) + "E";
+                        list += "" + ((index % 8) + 1) + (index % 8) + "E"; // x1 = 1 right
                     }
                 }
             }
-            System.out.println(list);
         }
+        System.out.println(list);
     }
 
 }
