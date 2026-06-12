@@ -35,10 +35,20 @@ public class UserInterface extends JPanel{
 		});
 
 		/* TESTING BITBOARD TRAVERSAL AND NOTATION
-		long traversal = 281474976645120L;
+		This traversal reads the bitboard right to left
+		long traversal = 9223372036854775807L; // 1000000000000000000000000000000000000000000000000000000000000000
 		for (int i = 0; i < 64; i++) {
 			if (((traversal >> i) & 1) == 0) {
 				System.out.println("1 is at index " + i);
+			}
+		}
+		This traversal reads left to right
+		long traversal = -9223372036854775808L;
+		for (int i = 0; i < 64; i++) {
+			if (((traversal << i) & 1) == 0) {
+				System.out.println("1 is at index " + i);
+			} else {
+				System.out.println("0 is at index: " + i);
 			}
 		}
 		long test = 922337203685477587L;
