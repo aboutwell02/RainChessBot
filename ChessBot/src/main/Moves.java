@@ -34,17 +34,17 @@ public class Moves {
     // Bitmasks
     static long FileMasks[] =  {0x101010101010101L, 0x202020202020202L, 0x404040404040404L, 0x808080808080808L, 0x1010101010101010L, 0x2020202020202020L, 0x4040404040404040L, 0x8080808080808080L};
     static long RankMasks[] = {0xFFL, 0xFF00L, 0xFF0000L, 0xFF000000L, 0xFF00000000L, 0xFF0000000000L, 0xFF000000000000L, 0xFF00000000000000L};
-    static long downwardsDiagonalMasks[] = {0x1L, 0x102L, 0x10204L, 0x1020408L, 0x102040810L, 0x10204081020L, 0x1020408102040L, 0x102040810204080L, 0x2040810204080000L, 0x408102040800000L, 0x810204080000000L, 0x1020408000000000L, 0x2040800000000000L, 0x4080000000000000L, 0x800000000000000L};
+    static long downwardsDiagonalMasks[] = {0x1L, 0x102L, 0x10204L, 0x1020408L, 0x102040810L, 0x10204081020L, 0x1020408102040L, 0x102040810204080L, 0x204081020408000L, 0x408102040800000L, 0x810204080000000L, 0x1020408000000000L, 0x2040800000000000L, 0x4080000000000000L, 0x8000000000000000L};
     static long upwardsDiagonalMasks[] = {0x80L, 0x8040L, 0x804020L, 0x80402010L, 0x8040201008L, 0x804020100804L, 0x80402010080402L, 0x8040201008040201L, 0x4020100804020100L, 0x2010080402010000L, 0x1008040201000000L, 0x804020100000000L, 0x402010000000000L, 0x201000000000000L, 0x100000000000000L};
 
-    // Sliding moves methods
-    static long neswSlidingMovement(int index) {
+    // SLIDING MOVEMENT METHODS
+    static long orthogonalSlidingMovement(int index) {
 
         long binaryIndex = 1L << index;
         //System.out.println("binaryIndex is: " + binaryIndex);
         long possibilitiesHorizontal = (OCCUPIED - 2 * binaryIndex) ^ Long.reverse(Long.reverse(OCCUPIED) - 2 * Long.reverse(binaryIndex));
         //System.out.println("Horizonal possibilities is: ");
-        long possibilitiesVertical = ((OCCUPIED & FileMasks[index % 8]) - (2 - binaryIndex)) ^ Long.reverse(Long.reverse(OCCUPIED) - 2 * Long.reverse(binaryIndex));
+        long possibilitiesVertical = ((OCCUPIED & FileMasks[index % 8]) - (2 * binaryIndex)) ^ Long.reverse(Long.reverse(OCCUPIED & FileMasks[index % 8]) - (2 * Long.reverse(binaryIndex)));
         //System.out.println("Vertical possibilities is: ");
         //System.out.println("Total possible moves: ");
         return (possibilitiesHorizontal & RankMasks[index / 8]) | (possibilitiesVertical & FileMasks[index % 8]);
@@ -53,17 +53,19 @@ public class Moves {
 
         long binaryIndex = 1L << index;
         long possibilitiesDownwards = ((OCCUPIED & downwardsDiagonalMasks[(index % 8) + (index / 8)]) - (2 * binaryIndex)) ^ Long.reverse(Long.reverse(OCCUPIED & downwardsDiagonalMasks[(index % 8) + (index / 8)]) - (2 * Long.reverse(binaryIndex)));
-        long possibilitiesUpwards = ((OCCUPIED & upwardsDiagonalMasks[(index % 8) + (index / 8) + 7]) - (2 * binaryIndex)) ^ Long.reverse(Long.reverse(OCCUPIED & upwardsDiagonalMasks[(index / 8) - (index % 8) + 7]) - (2 * Long.reverse(binaryIndex)));
+        long possibilitiesUpwards = ((OCCUPIED & upwardsDiagonalMasks[(index / 8) - (index % 8) + 7]) - (2 * binaryIndex)) ^ Long.reverse(Long.reverse(OCCUPIED & upwardsDiagonalMasks[(index / 8) - (index % 8) + 7]) - (2 * Long.reverse(binaryIndex)));
         return (possibilitiesDownwards & downwardsDiagonalMasks[(index / 8) + (index % 8)]) | (possibilitiesUpwards & upwardsDiagonalMasks[(index / 8) - (index % 8) + 7]);
 
     }
 
+    // POSSIBLE MOVES
     public static String validMovesWhite(String history, long WP, long WN, long WB, long WR, long WQ, long WK, long BP, long BN, long BB, long BR, long BQ, long BK) {
         INVALID_WHITE_CAPTURES =~ (WP | WN | WB | WR | WQ | WK | BK); // Add Black king to avoid King's from being captured
         BLACK_PIECES = (BP | BN | BB | BR | BQ);
-        EMPTY =~ (WP | WN | WB | WR | WQ | WK | BP | BN | BB | BR | BQ | BK);
+        OCCUPIED = (WP | WN | WB | WR | WQ | WK | BP | BN | BB | BR | BQ | BK);
+        EMPTY =~ OCCUPIED;
         timeExperiment(history, WP, BP);
-        String list = possiblePawnWhite(history, WP, BP);
+        String list = possiblePawnWhite(history, WP, BP) + possibleBishopWhite(OCCUPIED, WB) + possibleRookWhite(OCCUPIED, WR) + possibleQueenWhite(OCCUPIED, WQ);
         /*
         + possibleKnightWhite(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
         + possibleBishopWhite(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
@@ -73,7 +75,6 @@ public class Moves {
         */
         return list;
     }
-
     public static String possiblePawnWhite(String history, long WP, long BP) {
         // OPTIMIZED METHOD FOR VALID MOVE SEARCH (~4 times faster than previous method)
         String list = "";
@@ -183,7 +184,77 @@ public class Moves {
                 }
             }
         }
-        System.out.println(list);
+        System.out.println("List of possible white pawn moves: " + list);
+        return list;
+    }
+    public static String possibleKnightWhite(long OCCUPIED, long WN) {
+        // TODO: Add knight movement logic
+        return "temp";
+    }
+    public static String possibleBishopWhite(long OCCUPIED, long WB) {
+        String list = "";
+        long possibility;
+        long i = WB & -WB;
+        //int iSquare, index;
+        while (i != 0) { // while there are still bishops that haven't been checked yet
+            int iSquare = Long.numberOfTrailingZeros(i); // Location of current bishop
+            possibility = diagonalSlidingMovement(iSquare) & INVALID_WHITE_CAPTURES;
+            long j = possibility & -possibility;
+            while (j != 0) { // Goes through each possible move for current bishop
+                int index = Long.numberOfTrailingZeros(j);
+                list += "" + (iSquare % 8) + (iSquare / 8) + (index % 8) + (index / 8); // x1y1x2y2
+                possibility &=~ j;
+                j = possibility & -possibility;
+            }
+            WB &=~ i;
+            i = WB & -WB; // Next bishop if available
+        }
+        // int numberOfPossibleMoves = list.length() / 4;
+        System.out.println("List of possible white bishop moves: " + list);
+        return list;
+    }
+    public static String possibleRookWhite(long OCCUPIED, long WR) {
+        String list = "";
+        long possibility;
+        long i = WR & -WR;
+        while (i != 0) {
+            int iSquare = Long.numberOfTrailingZeros(i);
+            possibility = orthogonalSlidingMovement(iSquare) & INVALID_WHITE_CAPTURES;
+            long j = possibility & -possibility;
+            while (j != 0) {
+                int index = Long.numberOfTrailingZeros(j);
+                list += "" + (iSquare % 8) + (iSquare / 8) + (index % 8) + (index / 8);
+                possibility &=~ j;
+                j = possibility & -possibility;
+            }
+            WR &=~ i;
+            i = WR & -WR;
+        }
+        // int numberOfPossibleMoves = list.length() / 4;
+        System.out.println("List of possible white rook moves: " + list);
+        return list;
+    }
+    public static String possibleQueenWhite(long OCCUPIED, long WQ) {
+        String list = "";
+        long possibility;
+        long i = WQ & -WQ;
+        while (i != 0) {
+            int iSquare = Long.numberOfTrailingZeros(i);
+            //System.out.println("iSquare equals: " + iSquare);
+            possibility = (orthogonalSlidingMovement(iSquare) & INVALID_WHITE_CAPTURES) | (diagonalSlidingMovement(iSquare) & INVALID_WHITE_CAPTURES);
+            //System.out.println("Possibility equals: " + possibility);
+            long j = possibility & -possibility;
+            while (j != 0) {
+                int index = Long.numberOfTrailingZeros(j);
+                list += "" + (iSquare % 8) + (iSquare / 8) + (index % 8) + (index / 8);
+                possibility &=~ j;
+                j = possibility & -possibility;
+            }
+            WQ &=~ i;
+            i = WQ & -WQ;
+        }
+        // int numberOfPossibleMoves = list.length() / 4;
+        System.out.println("List of possible white queen moves: " + list);
         return list;
     }
     public static void drawBitboard (long bitboard) {
