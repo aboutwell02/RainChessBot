@@ -122,7 +122,6 @@ public class UserInterface extends JPanel{
 		pieceImage = new ImageIcon("C:/Users/ajab0/git/RainChessBot/ChessBot/res/ChessPiecesArray.png").getImage();
 		// Testing for CorrectBoard Generation
 		//BoardGeneration.drawArray(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
-		// TODO: Manipulate Piece Bitboards
 		/* Bitwise Operations Debugger
 		long test = 2L;
 		System.out.println(test);
@@ -206,6 +205,7 @@ public class UserInterface extends JPanel{
 	public static void newGame() {
 		BoardGeneration.initiateStandardBoard();
 		Moves.validMovesWhite("", WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
+		Moves.validMovesBlack("", WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
 	}
 	
 }

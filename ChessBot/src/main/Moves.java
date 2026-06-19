@@ -7,10 +7,10 @@ public class Moves {
     static long FILE_A = 72340172838076673L; //  1000000010000000100000001000000010000000100000001000000010000000
     static long FILE_H = 0x8080808080808080L; //  0000000100000001000000010000000100000001000000010000000100000001
     static long FILE_AB = 217020518514230019L; // 1100000011000000110000001100000011000000110000001100000011000000
-    static long FILE_GH = 4557430888798830400L; // 0000001100000011000000110000001100000011000000110000001100000011
+    static long FILE_GH = -4557430888798830400L; // 0000001100000011000000110000001100000011000000110000001100000011
 
    // Pawn Promotions, Two Steps, and En Passant
-    static long RANK_1 = 72057594037927936L; // 1111111100000000000000000000000000000000000000000000000000000000
+    static long RANK_1 = -72057594037927936L; // 1111111100000000000000000000000000000000000000000000000000000000
     static long RANK_4 = 1095216660480L; // 0000000000000000000000001111111100000000000000000000000000000000
     static long RANK_5 = 4278190080L; // 0000000000000000000000000000000011111111000000000000000000000000
     static long RANK_8 = 255L; // 0000000000000000000000000000000000000000000000000000000011111111
@@ -21,15 +21,14 @@ public class Moves {
     static long KING_SIDE = 1085102592571150096L;
     static long QUEEN_SIDE = 1085102592571150095L;
 
-    // Testing Pieces
-    static long KING_B7 = 460039L;
-    static long KNIGHT_C6 = 43234889994L;
-
     // Chess Rules
-    static long INVALID_WHITE_CAPTURES;
+    static long INVALID_CAPTURES;
+    static long WHITE_PIECES;
     static long BLACK_PIECES;
     static long EMPTY;
     static long OCCUPIED;
+    static long KNIGHT_RANGE = 43234889994L; // eg. 00000000000010100001000100000n0000010001000010100000000000000000
+    static long KING_RANGE = 460039L;
 
     // Bitmasks
     static long FileMasks[] =  {0x101010101010101L, 0x202020202020202L, 0x404040404040404L, 0x808080808080808L, 0x1010101010101010L, 0x2020202020202020L, 0x4040404040404040L, 0x8080808080808080L};
@@ -60,20 +59,150 @@ public class Moves {
 
     // POSSIBLE MOVES
     public static String validMovesWhite(String history, long WP, long WN, long WB, long WR, long WQ, long WK, long BP, long BN, long BB, long BR, long BQ, long BK) {
-        INVALID_WHITE_CAPTURES =~ (WP | WN | WB | WR | WQ | WK | BK); // Add Black king to avoid King's from being captured
+        INVALID_CAPTURES =~ (WP | WN | WB | WR | WQ | WK | BK); // Add Black king to avoid Kings from being captured
         BLACK_PIECES = (BP | BN | BB | BR | BQ);
         OCCUPIED = (WP | WN | WB | WR | WQ | WK | BP | BN | BB | BR | BQ | BK);
         EMPTY =~ OCCUPIED;
         timeExperiment(history, WP, BP);
-        String list = possiblePawnWhite(history, WP, BP) + possibleBishopWhite(OCCUPIED, WB) + possibleRookWhite(OCCUPIED, WR) + possibleQueenWhite(OCCUPIED, WQ);
-        /*
-        + possibleKnightWhite(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
-        + possibleBishopWhite(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
-        + possibleRookWhite(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
-        + possibleQueenWhite(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
-        + possibleKingWhite(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
-        */
+        String list = possiblePawnWhite(history, WP, BP) + possibleBishop(OCCUPIED, WB) + possibleRook(OCCUPIED, WR) + possibleQueen(OCCUPIED, WQ) + possibleKnight(OCCUPIED, WN) + possibleKing(OCCUPIED, WK);
+        int numberOfPossibleMoves = list.length() / 4;
+        System.out.println("This is the list for white: " + list);
+        System.out.println("Number of possible moves for white: " + numberOfPossibleMoves);
         return list;
+    }
+    public static String validMovesBlack(String history, long WP, long WN, long WB, long WR, long WQ, long WK, long BP, long BN, long BB, long BR, long BQ, long BK) {
+        INVALID_CAPTURES =~ (BP | BN | BB | BR | BQ | BK | WK); // Add White king to avoid Kings from being captured
+        WHITE_PIECES = (WP | WN | WB | WR | WQ);
+        OCCUPIED = (WP | WN | WB | WR | WQ | WK | BP | BN | BB | BR | BQ | BK);
+        EMPTY =~ OCCUPIED;
+        //timeExperiment(history, WP, BP);
+        String list = possiblePawnBlack(history, BP, WP) + possibleBishop(OCCUPIED, BB) + possibleRook(OCCUPIED, BR) + possibleQueen(OCCUPIED, BQ) + possibleKnight(OCCUPIED, BN) + possibleKing(OCCUPIED, BK);
+        int numberOfPossibleMoves = list.length() / 4;
+        System.out.println("This is the list for black: " + list);
+        System.out.println("Number of possible moves for black: " + numberOfPossibleMoves);
+        return list;
+    }
+    public static long inSightsWhite(long WP, long WN, long WB, long WR, long WQ, long WK, long BP, long BN, long BB, long BR, long BQ, long BK) {
+        long unsafe;
+        OCCUPIED = WP | WN | WB | WR | WQ | WK | BP | BN | BB | BR | BQ | BK;
+        // PAWNS
+        unsafe = ((WP >> 7) &~ FILE_A) | ((WP >> 9) &~ FILE_H);
+        long possibility;
+        // KNIGHTS
+        long i = WN & - WN;
+        if (i != 0) {
+            int iSquare = Long.numberOfTrailingZeros(i);
+            if (iSquare > 18) {
+                possibility = KNIGHT_RANGE << (iSquare - 18);
+            } else {
+                possibility = KNIGHT_RANGE >> (18 - iSquare);
+            }
+            if ((iSquare % 8) < 4) {
+                possibility &=~ FILE_GH;
+            } else {
+                possibility &=~ FILE_AB;
+            }
+            unsafe |= possibility;
+            WN &=~ i;
+            i = WN & -WN;
+        }
+        // DIAGONAL LINES OF SIGHT
+        long diagonals = WB | WQ;
+        i = diagonals & -diagonals;
+        while (i != 0) {
+            int iSquare = Long.numberOfTrailingZeros(i);
+            possibility = diagonalSlidingMovement(iSquare);
+            unsafe |= possibility;
+            diagonals &=~ i;
+            i = diagonals & -diagonals;
+        }
+        // ORTHOGONAL LINES OF SIGHT
+        long orthogonals = WR | WQ;
+        i = orthogonals & -orthogonals;
+        while (i != 0) {
+            int iSquare = Long.numberOfTrailingZeros(i);
+            possibility = orthogonalSlidingMovement(iSquare);
+            unsafe |= possibility;
+            orthogonals &=~ i;
+            i = orthogonals & -orthogonals;
+        }
+        // KING
+        int iSquare = Long.numberOfTrailingZeros(WK);
+        if (iSquare > 9) {
+            possibility = KING_RANGE << (iSquare - 9);
+        } else {
+            possibility = KING_RANGE >> (9 - iSquare);
+        }
+        if ((iSquare % 8) < 4) {
+            possibility &=~ FILE_GH;
+        } else {
+            possibility &=~ FILE_AB;
+        }
+        unsafe |= possibility;
+        System.out.println("The bitboard for square targetable by white pieces is: ");
+        drawBitboard(unsafe);
+        return unsafe;
+    }
+    public static long inSightsBlack(long WP, long WN, long WB, long WR, long WQ, long WK, long BP, long BN, long BB, long BR, long BQ, long BK) {
+        long unsafe;
+        OCCUPIED = WP | WN | WB | WR | WQ | WK | BP | BN | BB | BR | BQ | BK;
+        // PAWNS
+        unsafe = ((BP << 7) &~ FILE_H) | ((BP << 9) &~ FILE_A);
+        long possibility;
+        // KNIGHTS
+        long i = BN & - BN;
+        if (i != 0) {
+            int iSquare = Long.numberOfTrailingZeros(i);
+            if (iSquare > 18) {
+                possibility = KNIGHT_RANGE << (iSquare - 18);
+            } else {
+                possibility = KNIGHT_RANGE >> (18 - iSquare);
+            }
+            if ((iSquare % 8) < 4) {
+                possibility &=~ FILE_GH;
+            } else {
+                possibility &=~ FILE_AB;
+            }
+            unsafe |= possibility;
+            BN &=~ i;
+            i = BN & -BN;
+        }
+        // DIAGONAL LINES OF SIGHT
+        long diagonals = BB | BQ;
+        i = diagonals & -diagonals;
+        while (i != 0) {
+            int iSquare = Long.numberOfTrailingZeros(i);
+            possibility = diagonalSlidingMovement(iSquare);
+            unsafe |= possibility;
+            diagonals &=~ i;
+            i = diagonals & -diagonals;
+        }
+        // ORTHOGONAL LINES OF SIGHT
+        long orthogonals = BR | BQ;
+        i = orthogonals & -orthogonals;
+        while (i != 0) {
+            int iSquare = Long.numberOfTrailingZeros(i);
+            possibility = orthogonalSlidingMovement(iSquare);
+            unsafe |= possibility;
+            orthogonals &=~ i;
+            i = orthogonals & -orthogonals;
+        }
+        // KING
+        int iSquare = Long.numberOfTrailingZeros(WK);
+        if (iSquare > 9) {
+            possibility = KING_RANGE << (iSquare - 9);
+        } else {
+            possibility = KING_RANGE >> (9 - iSquare);
+        }
+        if ((iSquare % 8) < 4) {
+            possibility &=~ FILE_GH;
+        } else {
+            possibility &=~ FILE_AB;
+        }
+        unsafe |= possibility;
+        System.out.println("The bitboard for square targetable by white pieces is: ");
+        drawBitboard(unsafe);
+        return unsafe;
     }
     public static String possiblePawnWhite(String history, long WP, long BP) {
         // OPTIMIZED METHOD FOR VALID MOVE SEARCH (~4 times faster than previous method)
@@ -131,7 +260,7 @@ public class Moves {
         while (possibility != 0) {
             //drawBitboard(possibility);
             int index = Long.numberOfTrailingZeros(possibility);
-            list += "" + ((index % 8) - 1) + (index % 8) + "QP" + ((index % 8) - 1) + (index % 8) + "RP" + ((index % 8) - 1) + (index % 8) + "BP" + ((index % 8) - 1) + (index % 8) + "NP"; // x1 = 1 left
+            list += "" + ((index % 8) - 1) + (index % 8) + "qP" + ((index % 8) - 1) + (index % 8) + "rP" + ((index % 8) - 1) + (index % 8) + "bP" + ((index % 8) - 1) + (index % 8) + "nP"; // x1 = 1 left
             PAWN_MOVES = PAWN_MOVES &~ (possibility);
             possibility = PAWN_MOVES & -PAWN_MOVES;
         }
@@ -144,7 +273,7 @@ public class Moves {
             //drawBitboard(possibility);
             int index = Long.numberOfTrailingZeros(possibility);
             //System.out.println("Index is: " + index);
-            list += "" + ((index % 8) + 1) + ((index % 8)) + "QP" + ((index % 8) + 1) + ((index % 8)) + "RP" + ((index % 8) + 1) + ((index % 8)) + "BP" + ((index % 8) + 1) + ((index % 8)) + "NP"; // x1 = 1 right
+            list += "" + ((index % 8) + 1) + ((index % 8)) + "qP" + ((index % 8) + 1) + ((index % 8)) + "rP" + ((index % 8) + 1) + ((index % 8)) + "bP" + ((index % 8) + 1) + ((index % 8)) + "nP"; // x1 = 1 right
             PAWN_MOVES = PAWN_MOVES &~ (possibility);
             //System.out.println("PAWN_MOVES changed to: " + PAWN_MOVES);
             possibility = PAWN_MOVES & -PAWN_MOVES;
@@ -157,11 +286,11 @@ public class Moves {
         while (possibility != 0) {
             //drawBitboard(possibility);
             int index = Long.numberOfTrailingZeros(possibility);
-            list += "" + (index % 8) + (index % 8) + "QP" + (index % 8) + (index % 8) + "RP" + (index % 8) + (index % 8) + "BP" + (index % 8) + (index % 8) + "NP"; // x1 = same
+            list += "" + (index % 8) + (index % 8) + "qP" + (index % 8) + (index % 8) + "rP" + (index % 8) + (index % 8) + "bP" + (index % 8) + (index % 8) + "nP"; // x1 = same
             PAWN_MOVES &=~ (possibility);
-            System.out.println("PAWN_MOVES changed to: " + PAWN_MOVES);
+            //System.out.println("PAWN_MOVES changed to: " + PAWN_MOVES);
             possibility = PAWN_MOVES & -PAWN_MOVES;
-            System.out.println("Possibility changed to: " + possibility);
+            //System.out.println("Possibility changed to: " + possibility);
         }
         //System.out.println("After FORWARD PROMOTION Loop: " + possibility);
         //System.out.println(list);
@@ -171,55 +300,150 @@ public class Moves {
             if (history.charAt(history.length() - 2) == history.charAt(history.length() - 4) && Math.abs(history.charAt(history.length() - 1) - history.charAt(history.length() - 3)) == 2) {
                 int file = history.charAt(history.length() - 4) - '0';
                 possibility = (WP << 1) & BP & RANK_5 &~ FILE_A & FileMasks[file]; // En passant RIGHT
-                System.out.println("Right capture en passant at: " + possibility);
+                //System.out.println("Right capture en passant at: " + possibility);
                 if (possibility != 0) {
                     int index = Long.numberOfTrailingZeros(possibility);
                     list += "" + ((index % 8) - 1) + (index % 8) + "_" + "E"; // x1 = 1 left
                 }
                 possibility = (WP >> 1) & BP & RANK_5 &~ FILE_H & FileMasks[file]; // En passant LEFT
-                System.out.println("Left capture en passant at: " + possibility);
+                //System.out.println("Left capture en passant at: " + possibility);
                 if (possibility != 0) {
                     int index = Long.numberOfTrailingZeros(possibility);
                     list += "" + ((index % 8) + 1) + (index % 8) + "_" + "E"; // x1 = 1 right
                 }
             }
         }
-        System.out.println("List of possible white pawn moves: " + list);
+        //System.out.println("List of possible white pawn moves: " + list);
         return list;
     }
-    public static String possibleKnightWhite(long OCCUPIED, long WN) {
-        // TODO: Add knight movement logic
-        return "temp";
-    }
-    public static String possibleBishopWhite(long OCCUPIED, long WB) {
+    public static String possiblePawnBlack(String history, long BP, long WP) {
+        // OPTIMIZED METHOD FOR VALID MOVE SEARCH (~4 times faster than previous method)
         String list = "";
-        long possibility;
-        long i = WB & -WB;
-        //int iSquare, index;
-        while (i != 0) { // while there are still bishops that haven't been checked yet
-            int iSquare = Long.numberOfTrailingZeros(i); // Location of current bishop
-            possibility = diagonalSlidingMovement(iSquare) & INVALID_WHITE_CAPTURES;
-            long j = possibility & -possibility;
-            while (j != 0) { // Goes through each possible move for current bishop
-                int index = Long.numberOfTrailingZeros(j);
-                list += "" + (iSquare % 8) + (iSquare / 8) + (index % 8) + (index / 8); // x1y1x2y2
-                possibility &=~ j;
-                j = possibility & -possibility;
-            }
-            WB &=~ i;
-            i = WB & -WB; // Next bishop if available
+
+        // PAWN REGULAR MOVEMENT x1y1x2y2
+        long PAWN_MOVES = (BP << 7) & WHITE_PIECES &~ RANK_1 &~ FILE_H; // Pawn captures to the RIGHT
+        long possibility = PAWN_MOVES & -PAWN_MOVES;
+        //System.out.println("Before RIGHT CAPTURES Loop: " + possibility);
+        while (possibility != 0) {
+            //drawBitboard(possibility);
+            int index = Long.numberOfTrailingZeros(possibility);
+            list += "" + ((index % 8) + 1) + ((index / 8) - 1) + (index % 8) + (index / 8); // x1y1 = 1 left & 1 down
+            PAWN_MOVES &=~ (possibility);
+            possibility = PAWN_MOVES & -PAWN_MOVES;
         }
-        // int numberOfPossibleMoves = list.length() / 4;
-        System.out.println("List of possible white bishop moves: " + list);
+        //System.out.println("After RIGHT CAPTURE Loop: " + possibility);
+        PAWN_MOVES = (BP << 9) & WHITE_PIECES &~ RANK_1 &~ FILE_A; // Pawn captures to the LEFT
+        possibility = PAWN_MOVES & -PAWN_MOVES;
+        //System.out.println("Before LEFT CAPTURES Loop: " + possibility);
+        while (possibility != 0) {
+            //drawBitboard(possibility);
+            int index = Long.numberOfTrailingZeros(possibility);
+            list += "" +((index % 8) - 1) + ((index / 8) - 1) + (index % 8) + (index / 8); // x1y1 = 1 right & 1 down
+            PAWN_MOVES &=~ (possibility);
+            possibility = PAWN_MOVES & -PAWN_MOVES;
+        }
+        //System.out.println("After LEFT CAPTURE Loop: " + possibility);
+        PAWN_MOVES = (BP << 8) & EMPTY &~ RANK_1; // Pawn moves FORWARD ONE square
+        possibility = PAWN_MOVES &- PAWN_MOVES;
+        while (possibility != 0) {
+            //drawBitboard(possibility);
+            int index = Long.numberOfTrailingZeros(possibility);
+            list += "" + ((index % 8)) + ((index / 8) - 1) + (index % 8) + (index / 8); // x1y1 = same & 1 down
+            PAWN_MOVES &=~ (possibility);
+            possibility = PAWN_MOVES & -PAWN_MOVES;
+        }
+        //System.out.println("After FORWARD STEP Loop: " + possibility);
+        PAWN_MOVES = (BP << 16) & EMPTY & (EMPTY << 8) & RANK_5; // Pawn moves FORWARD TWO squares as its first move
+        possibility = PAWN_MOVES & -PAWN_MOVES;
+        //System.out.println("Before TWO STEP Loop: " + possibility);
+        while (possibility != 0) {
+            //drawBitboard(possibility);
+            int index = Long.numberOfTrailingZeros(possibility);
+            list += "" + (index % 8) + ((index / 8) - 2) + (index % 8) + (index / 8); // x1y1 = same & 2 down
+            PAWN_MOVES &=~ (possibility);
+            possibility = PAWN_MOVES & -PAWN_MOVES;
+        }
+
+        // PAWN PROMOTION MOVEMENT x1x2 (Piece) "P"
+        PAWN_MOVES = (BP << 7) & WHITE_PIECES & RANK_1 &~ FILE_H; // Pawn captures RIGHT and PROMOTES
+        possibility = PAWN_MOVES & -PAWN_MOVES;
+        //System.out.println("Before RIGHT PROMOTION Loop: " + possibility);
+        while (possibility != 0) {
+            //drawBitboard(possibility);
+            int index = Long.numberOfTrailingZeros(possibility);
+            list += "" + ((index % 8) + 1) + (index % 8) + "QP" + ((index % 8) + 1) + (index % 8) + "RP" + ((index % 8) + 1) + (index % 8) + "BP" + ((index % 8) + 1) + (index % 8) + "NP"; // x1 = 1 left
+            PAWN_MOVES = PAWN_MOVES &~ (possibility);
+            possibility = PAWN_MOVES & -PAWN_MOVES;
+        }
+        //System.out.println("After RIGHT PROMOTION Loop: " + possibility);
+        PAWN_MOVES = (BP << 9) & WHITE_PIECES & RANK_1 &~ FILE_A; // Pawn captures LEFT and PROMOTES
+        possibility = PAWN_MOVES & -PAWN_MOVES;
+        //System.out.println("PAWN_MOVES before LEFT PROMOTION loop: " + PAWN_MOVES);
+        //System.out.println("Possibility before LEFT PROMOTION Loop: " + possibility);
+        while (possibility != 0) {
+            //drawBitboard(possibility);
+            int index = Long.numberOfTrailingZeros(possibility);
+            //System.out.println("Index is: " + index);
+            list += "" + ((index % 8) - 1) + ((index % 8)) + "QP" + ((index % 8) - 1) + ((index % 8)) + "RP" + ((index % 8) - 1) + ((index % 8)) + "BP" + ((index % 8) - 1) + ((index % 8)) + "NP"; // x1 = 1 right
+            PAWN_MOVES = PAWN_MOVES &~ (possibility);
+            //System.out.println("PAWN_MOVES changed to: " + PAWN_MOVES);
+            possibility = PAWN_MOVES & -PAWN_MOVES;
+            //System.out.println("Possibility changed to: " + possibility);
+        }
+        //System.out.println("After LEFT PROMOTION Loop: " + possibility);
+        PAWN_MOVES = (BP << 8) & EMPTY & RANK_1; // Pawn moves FORWARD one square and PROMOTES
+        possibility = PAWN_MOVES & -PAWN_MOVES;
+        //System.out.println("PAWN_MOVES  & possibility before Forward Promotion loop; " + PAWN_MOVES);
+        while (possibility != 0) {
+            //drawBitboard(possibility);
+            int index = Long.numberOfTrailingZeros(possibility);
+            list += "" + (index % 8) + (index % 8) + "QP" + (index % 8) + (index % 8) + "RP" + (index % 8) + (index % 8) + "BP" + (index % 8) + (index % 8) + "NP"; // x1 = same
+            PAWN_MOVES &=~ (possibility);
+            //System.out.println("PAWN_MOVES changed to: " + PAWN_MOVES);
+            possibility = PAWN_MOVES & -PAWN_MOVES;
+            //System.out.println("Possibility changed to: " + possibility);
+        }
+        //System.out.println("After FORWARD PROMOTION Loop: " + possibility);
+        //System.out.println(list);
+
+        // EN PASSANT "x1x2 UNDERSCORE E"
+        if (history.length() == 4) {
+            if (history.charAt(history.length() - 2) == history.charAt(history.length() - 4) && Math.abs(history.charAt(history.length() - 1) - history.charAt(history.length() - 3)) == 2) {
+                int file = history.charAt(history.length() - 4) - '0';
+                possibility = (BP >> 1) & WP & RANK_4 &~ FILE_H & FileMasks[file]; // En passant RIGHT
+                //System.out.println("Right capture en passant at: " + possibility);
+                if (possibility != 0) {
+                    int index = Long.numberOfTrailingZeros(possibility);
+                    list += "" + ((index % 8) + 1) + (index % 8) + "_" + "E"; // x1 = 1 left
+                }
+                possibility = (BP << 1) & WP & RANK_4 &~ FILE_A & FileMasks[file]; // En passant LEFT
+                //System.out.println("Left capture en passant at: " + possibility);
+                if (possibility != 0) {
+                    int index = Long.numberOfTrailingZeros(possibility);
+                    list += "" + ((index % 8) - 1) + (index % 8) + "_" + "E"; // x1 = 1 right
+                }
+            }
+        }
+        //System.out.println("List of possible black pawn moves: " + list);
         return list;
     }
-    public static String possibleRookWhite(long OCCUPIED, long WR) {
+    public static String possibleKnight(long OCCUPIED, long N) {
         String list = "";
+        long i = N & -N;
         long possibility;
-        long i = WR & -WR;
         while (i != 0) {
             int iSquare = Long.numberOfTrailingZeros(i);
-            possibility = orthogonalSlidingMovement(iSquare) & INVALID_WHITE_CAPTURES;
+            if (iSquare > 18) {
+                possibility = KNIGHT_RANGE << (iSquare - 18);
+            } else {
+                possibility = KNIGHT_RANGE >> (18 - iSquare);
+            }
+            if ((iSquare % 8) < 4) { // take care of bit wrapping
+                possibility &=~ FILE_GH & INVALID_CAPTURES;
+            } else {
+                possibility &=~ FILE_AB & INVALID_CAPTURES;
+            }
+            //System.out.println("possibility before j loop: " + possibility);
             long j = possibility & -possibility;
             while (j != 0) {
                 int index = Long.numberOfTrailingZeros(j);
@@ -227,21 +451,64 @@ public class Moves {
                 possibility &=~ j;
                 j = possibility & -possibility;
             }
-            WR &=~ i;
-            i = WR & -WR;
+            N &=~ i;
+            i = N & -N;
         }
-        // int numberOfPossibleMoves = list.length() / 4;
-        System.out.println("List of possible white rook moves: " + list);
+        // int numberOfPossibileMoves = list.length() / 4;
+        //System.out.println("List of possible white knight moves: " + list);
         return list;
     }
-    public static String possibleQueenWhite(long OCCUPIED, long WQ) {
+    public static String possibleBishop(long OCCUPIED, long B) {
         String list = "";
         long possibility;
-        long i = WQ & -WQ;
+        long i = B & -B;
+        //int iSquare, index;
+        while (i != 0) { // while there are still bishops that haven't been checked yet
+            int iSquare = Long.numberOfTrailingZeros(i); // Location of current bishop
+            possibility = diagonalSlidingMovement(iSquare) & INVALID_CAPTURES;
+            long j = possibility & -possibility;
+            while (j != 0) { // Goes through each possible move for current bishop
+                int index = Long.numberOfTrailingZeros(j);
+                list += "" + (iSquare % 8) + (iSquare / 8) + (index % 8) + (index / 8); // x1y1x2y2
+                possibility &=~ j;
+                j = possibility & -possibility;
+            }
+            B &=~ i;
+            i = B & -B; // Next bishop if available
+        }
+        // int numberOfPossibleMoves = list.length() / 4;
+        //System.out.println("List of possible white bishop moves: " + list);
+        return list;
+    }
+    public static String possibleRook(long OCCUPIED, long R) {
+        String list = "";
+        long possibility;
+        long i = R & -R;
+        while (i != 0) {
+            int iSquare = Long.numberOfTrailingZeros(i);
+            possibility = orthogonalSlidingMovement(iSquare) & INVALID_CAPTURES;
+            long j = possibility & -possibility;
+            while (j != 0) {
+                int index = Long.numberOfTrailingZeros(j);
+                list += "" + (iSquare % 8) + (iSquare / 8) + (index % 8) + (index / 8);
+                possibility &=~ j;
+                j = possibility & -possibility;
+            }
+            R &=~ i;
+            i = R & -R;
+        }
+        // int numberOfPossibleMoves = list.length() / 4;
+        //System.out.println("List of possible white rook moves: " + list);
+        return list;
+    }
+    public static String possibleQueen(long OCCUPIED, long Q) {
+        String list = "";
+        long possibility;
+        long i = Q & -Q;
         while (i != 0) {
             int iSquare = Long.numberOfTrailingZeros(i);
             //System.out.println("iSquare equals: " + iSquare);
-            possibility = (orthogonalSlidingMovement(iSquare) & INVALID_WHITE_CAPTURES) | (diagonalSlidingMovement(iSquare) & INVALID_WHITE_CAPTURES);
+            possibility = (orthogonalSlidingMovement(iSquare) & INVALID_CAPTURES) | (diagonalSlidingMovement(iSquare) & INVALID_CAPTURES);
             //System.out.println("Possibility equals: " + possibility);
             long j = possibility & -possibility;
             while (j != 0) {
@@ -250,12 +517,42 @@ public class Moves {
                 possibility &=~ j;
                 j = possibility & -possibility;
             }
-            WQ &=~ i;
-            i = WQ & -WQ;
+            Q &=~ i;
+            i = Q & -Q;
         }
         // int numberOfPossibleMoves = list.length() / 4;
-        System.out.println("List of possible white queen moves: " + list);
+        //System.out.println("List of possible white queen moves: " + list);
         return list;
+    }
+    public static String possibleKing(long OCCUPIED, long K) {
+        // TODO: Remove illegal moves from possible moves list
+        String list = "";
+        if (K == 0) {
+            return list;
+        } else {
+            long possibility;
+            int iSquare = Long.numberOfTrailingZeros(K);
+            if (iSquare > 9) {
+                possibility = KING_RANGE << (iSquare - 9);
+            } else {
+                possibility = KING_RANGE >> (9 - iSquare);
+            }
+            if (iSquare % 8 < 4) {
+                possibility &=~ FILE_GH & INVALID_CAPTURES;
+            } else {
+                possibility &=~ FILE_AB & INVALID_CAPTURES;
+            }
+            long j = possibility & - possibility;
+            while (j != 0) {
+                int index = Long.numberOfTrailingZeros(j);
+                list += "" + (iSquare % 8) + (iSquare / 8) + (index % 8) + (index / 8);
+                possibility &=~ j;
+                j = possibility & -possibility;
+            }
+            // int numberOfPossibileMoves = list.lenght() / 4;
+            //System.out.println("List of possible king moves: " + list);
+            return list;
+        }
     }
     public static void drawBitboard (long bitboard) {
         String chessBoard[][] = new String[8][8];
