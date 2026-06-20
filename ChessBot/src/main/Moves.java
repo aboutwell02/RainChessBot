@@ -29,6 +29,7 @@ public class Moves {
     static long OCCUPIED;
     static long KNIGHT_RANGE = 43234889994L; // eg. 00000000000010100001000100000n0000010001000010100000000000000000
     static long KING_RANGE = 460039L;
+    static int CASTLE_ROOKS[] = {63, 56, 7, 0};
 
     // Bitmasks
     static long FileMasks[] =  {0x101010101010101L, 0x202020202020202L, 0x404040404040404L, 0x808080808080808L, 0x1010101010101010L, 0x2020202020202020L, 0x4040404040404040L, 0x8080808080808080L};
@@ -58,29 +59,95 @@ public class Moves {
     }
 
     // POSSIBLE MOVES
-    public static String validMovesWhite(String history, long WP, long WN, long WB, long WR, long WQ, long WK, long BP, long BN, long BB, long BR, long BQ, long BK) {
+    public static String validMovesWhite(long WP, long WN, long WB, long WR, long WQ, long WK, long BP, long BN, long BB, long BR, long BQ, long BK, long EN_PASSANT, boolean CQSW, boolean CKSW, boolean CQSB, boolean CKSB) {
         INVALID_CAPTURES =~ (WP | WN | WB | WR | WQ | WK | BK); // Add Black king to avoid Kings from being captured
         BLACK_PIECES = (BP | BN | BB | BR | BQ);
         OCCUPIED = (WP | WN | WB | WR | WQ | WK | BP | BN | BB | BR | BQ | BK);
         EMPTY =~ OCCUPIED;
-        timeExperiment(history, WP, BP);
-        String list = possiblePawnWhite(history, WP, BP) + possibleBishop(OCCUPIED, WB) + possibleRook(OCCUPIED, WR) + possibleQueen(OCCUPIED, WQ) + possibleKnight(OCCUPIED, WN) + possibleKing(OCCUPIED, WK);
-        int numberOfPossibleMoves = list.length() / 4;
-        System.out.println("This is the list for white: " + list);
-        System.out.println("Number of possible moves for white: " + numberOfPossibleMoves);
+        //timeExperiment(WP, BP, EN_PASSANT);
+        String list = possiblePawnWhite(WP, BP, EN_PASSANT) + possibleBishop(OCCUPIED, WB) + possibleRook(OCCUPIED, WR) + possibleQueen(OCCUPIED, WQ) + possibleKnight(OCCUPIED, WN) + possibleKing(OCCUPIED, WK) + possibleCastleWhite(WR, CQSW, CKSW);
+        //int numberOfPossibleMoves = list.length() / 4;
+        //System.out.println("This is the list for white: " + list);
+        //System.out.println("Number of possible moves for white: " + numberOfPossibleMoves);
         return list;
     }
-    public static String validMovesBlack(String history, long WP, long WN, long WB, long WR, long WQ, long WK, long BP, long BN, long BB, long BR, long BQ, long BK) {
+    public static String validMovesBlack(long WP, long WN, long WB, long WR, long WQ, long WK, long BP, long BN, long BB, long BR, long BQ, long BK, long EN_PASSANT, boolean CQSW, boolean CKSW, boolean CQSB, boolean CKSB) {
         INVALID_CAPTURES =~ (BP | BN | BB | BR | BQ | BK | WK); // Add White king to avoid Kings from being captured
         WHITE_PIECES = (WP | WN | WB | WR | WQ);
         OCCUPIED = (WP | WN | WB | WR | WQ | WK | BP | BN | BB | BR | BQ | BK);
         EMPTY =~ OCCUPIED;
         //timeExperiment(history, WP, BP);
-        String list = possiblePawnBlack(history, BP, WP) + possibleBishop(OCCUPIED, BB) + possibleRook(OCCUPIED, BR) + possibleQueen(OCCUPIED, BQ) + possibleKnight(OCCUPIED, BN) + possibleKing(OCCUPIED, BK);
-        int numberOfPossibleMoves = list.length() / 4;
-        System.out.println("This is the list for black: " + list);
-        System.out.println("Number of possible moves for black: " + numberOfPossibleMoves);
+        String list = possiblePawnBlack(BP, WP, EN_PASSANT) + possibleBishop(OCCUPIED, BB) + possibleRook(OCCUPIED, BR) + possibleQueen(OCCUPIED, BQ) + possibleKnight(OCCUPIED, BN) + possibleKing(OCCUPIED, BK) + possibleCastleBlack(BR, CQSB, CKSB);
+        //int numberOfPossibleMoves = list.length() / 4;
+        //System.out.println("This is the list for black: " + list);
+        //System.out.println("Number of possible moves for black: " + numberOfPossibleMoves);
         return list;
+    }
+    public static long makeMoveWrong(String move, long WP, long WN, long WB, long WR, long WQ, long WK, long BP, long BN, long BB, long BR, long BQ, long BK, long EN_PASSANT) {
+        /*
+        long WPt = Moves.makeMove(moves.substring(i, i + 4), 'p'), WNt = Moves.makeMove(moves.substring(i, i + 4), 'n'), WBt = Moves.makeMove(moves.substring(i, i + 4), 'b'),
+        WRt = Moves.makeMove(moves.substring(i, i + 4), 'r'), WQt = Moves.makeMove(moves.substring(i, i + 4), 'q'), WKt = Moves.makeMove(moves.substring(i, i + 4), 'k'),
+        BPt = Moves.makeMove(moves.substring(i, i + 4), 'P'), BNt = Moves.makeMove(moves.substring(i, i + 4), 'N'), BBt = Moves.makeMove(moves.substring(i, i + 4), 'B'),
+        BRt = Moves.makeMove(moves.substring(i, i + 4), 'R'), BQt = Moves.makeMove(moves.substring(i, i + 4), 'Q'), BKt = Moves.makeMove(moves.substring(i, i + 4), 'K'),
+        WEN_PASSANTt = Moves.makeMoveTwoStep(moves.substring(i, i + 4), 'p'), BEN_PASSANTt = Moves.makeMovesTwoStep(i, (i + 4), 'P');
+         */
+        return 0;
+    }
+    public static long makeMove (long board, String move, char type) {
+        if (Character.isDigit(move.charAt(3))) {
+            int start = (Character.getNumericValue(move.charAt(0))) + (Character.getNumericValue(move.charAt(1)) * 8); // x + (y * 8) = index
+            int end = (Character.getNumericValue(move.charAt(2)) * 8) + (Character.getNumericValue(move.charAt(3)));
+            if (((board >> start) & 1) == 1) {board &=~ (1L << start); board |= (1L << end);} else {board &=~ (1L << end);} // removes bit from starting location and adds bit to end location. removes all other bits in same location
+        } else if (move.charAt(3) == 'P') { // PAWN PROMOTION
+            int start, end;
+            if (Character.isLowerCase(move.charAt(2))) { // white promotion
+                start = Long.numberOfTrailingZeros(FileMasks[move.charAt(0) - '0'] & RankMasks[6]); // x1 7th rank
+                end = Long.numberOfTrailingZeros(FileMasks[move.charAt(1) - '0'] & RankMasks[7]); // x2 8th rank
+            } else { // black promotion
+                start = Long.numberOfTrailingZeros(FileMasks[move.charAt(0) - '0'] & RankMasks[1]); // x1 2nd rank
+                end = Long.numberOfTrailingZeros(FileMasks[move.charAt(1) - '0'] & RankMasks[0]); // x2 1st rank
+            }
+            if (type == move.charAt(2)) {board &=~ (1L << start); board |= (1L << end);} else {board &=~ (1L << end);}
+        } else if (move.charAt(3) == 'E') { // EN PASSANT
+            int start, end;
+            if (Character.isLowerCase(move.charAt(2))) { // white en passant
+                start = Long.numberOfTrailingZeros(FileMasks[move.charAt(0) - '0'] & RankMasks[4]);
+                end = Long.numberOfTrailingZeros(FileMasks[move.charAt(1) - '0'] & RankMasks[5]);
+                board &=~ (1L << (FileMasks[move.charAt(1) - '0'] & RankMasks[4]));
+            } else {
+                start = Long.numberOfTrailingZeros(FileMasks[move.charAt(0) - '0'] & RankMasks[3]);
+                end = Long.numberOfTrailingZeros(FileMasks[move.charAt(1) - '0'] & RankMasks[2]);
+                board &=~ (1L << (FileMasks[move.charAt(1) - '0'] & RankMasks[3]));
+            }
+            if (((board >> start) & 1) == 1) {board &=~ (1L << start); board |= (1L << end);} // not capturing at end location
+        }
+        /*
+        else if (move.charAt(3) == 'C') { // CASTLING
+            int startKing, endKing, startRook, endRook;
+            if (move.charAt(2) == 'w') { // white castling
+                if (move.charAt(0) == 'Q') {
+                    startKing = 60;
+                    endKing = 58;
+                    startRook = 56;
+                    endRook = 59;
+                    board &=~ ((1L << startKing) | (1L << startRook)); board |= ((1L << endKing) | (1L << endRook));
+                }
+            }
+        }
+         */
+        else {
+            System.out.println("Move is not in valid notation. Ending character is: " + move.charAt(3));
+        }
+        return board;
+    }
+    public static long makeMoveTwoStep(long board, String move) {
+        if (Character.isDigit(move.charAt(3))) {
+            int start = (Character.getNumericValue(move.charAt(0))) + (Character.getNumericValue(move.charAt(1))* 8);
+            if (Math.abs(move.charAt(1) - move.charAt(3)) == 2 && (((board >> start) & 1) == 1)) { // a pawn move forward two
+                return FileMasks[move.charAt(0) - '0'];
+            }
+        }
+        return 0; // en passant not available
     }
     public static long inSightsWhite(long WP, long WN, long WB, long WR, long WQ, long WK, long BP, long BN, long BB, long BR, long BQ, long BK) {
         long unsafe;
@@ -188,7 +255,7 @@ public class Moves {
             i = orthogonals & -orthogonals;
         }
         // KING
-        int iSquare = Long.numberOfTrailingZeros(WK);
+        int iSquare = Long.numberOfTrailingZeros(BK);
         if (iSquare > 9) {
             possibility = KING_RANGE << (iSquare - 9);
         } else {
@@ -204,7 +271,7 @@ public class Moves {
         drawBitboard(unsafe);
         return unsafe;
     }
-    public static String possiblePawnWhite(String history, long WP, long BP) {
+    public static String possiblePawnWhite(long WP, long BP, long EN_PASSANT) {
         // OPTIMIZED METHOD FOR VALID MOVE SEARCH (~4 times faster than previous method)
         String list = "";
 
@@ -296,27 +363,20 @@ public class Moves {
         //System.out.println(list);
 
         // EN PASSANT "x1x2 UNDERSCORE E"
-        if (history.length() == 4) {
-            if (history.charAt(history.length() - 2) == history.charAt(history.length() - 4) && Math.abs(history.charAt(history.length() - 1) - history.charAt(history.length() - 3)) == 2) {
-                int file = history.charAt(history.length() - 4) - '0';
-                possibility = (WP << 1) & BP & RANK_5 &~ FILE_A & FileMasks[file]; // En passant RIGHT
-                //System.out.println("Right capture en passant at: " + possibility);
-                if (possibility != 0) {
-                    int index = Long.numberOfTrailingZeros(possibility);
-                    list += "" + ((index % 8) - 1) + (index % 8) + "_" + "E"; // x1 = 1 left
-                }
-                possibility = (WP >> 1) & BP & RANK_5 &~ FILE_H & FileMasks[file]; // En passant LEFT
-                //System.out.println("Left capture en passant at: " + possibility);
-                if (possibility != 0) {
-                    int index = Long.numberOfTrailingZeros(possibility);
-                    list += "" + ((index % 8) + 1) + (index % 8) + "_" + "E"; // x1 = 1 right
-                }
-            }
+        possibility = (WP << 1) & BP & RANK_5 &~ FILE_A & EN_PASSANT; // EN PASSANT RIGHT
+        if (possibility != 0) {
+            int index = Long.numberOfTrailingZeros(possibility);
+            list += "" + ((index % 8) - 1) + (index % 8) + "pE";
+        }
+        possibility = (WP >> 1) & BP & RANK_5 &~ FILE_H & EN_PASSANT; // EN PASSANT LEFT
+        if (possibility != 0) {
+            int index = Long.numberOfTrailingZeros(possibility);
+            list += "" + ((index & 8) + 1) + (index % 8) + "pE";
         }
         //System.out.println("List of possible white pawn moves: " + list);
         return list;
     }
-    public static String possiblePawnBlack(String history, long BP, long WP) {
+    public static String possiblePawnBlack(long BP, long WP, long EN_PASSANT) {
         // OPTIMIZED METHOD FOR VALID MOVE SEARCH (~4 times faster than previous method)
         String list = "";
 
@@ -407,22 +467,15 @@ public class Moves {
         //System.out.println(list);
 
         // EN PASSANT "x1x2 UNDERSCORE E"
-        if (history.length() == 4) {
-            if (history.charAt(history.length() - 2) == history.charAt(history.length() - 4) && Math.abs(history.charAt(history.length() - 1) - history.charAt(history.length() - 3)) == 2) {
-                int file = history.charAt(history.length() - 4) - '0';
-                possibility = (BP >> 1) & WP & RANK_4 &~ FILE_H & FileMasks[file]; // En passant RIGHT
-                //System.out.println("Right capture en passant at: " + possibility);
-                if (possibility != 0) {
-                    int index = Long.numberOfTrailingZeros(possibility);
-                    list += "" + ((index % 8) + 1) + (index % 8) + "_" + "E"; // x1 = 1 left
-                }
-                possibility = (BP << 1) & WP & RANK_4 &~ FILE_A & FileMasks[file]; // En passant LEFT
-                //System.out.println("Left capture en passant at: " + possibility);
-                if (possibility != 0) {
-                    int index = Long.numberOfTrailingZeros(possibility);
-                    list += "" + ((index % 8) - 1) + (index % 8) + "_" + "E"; // x1 = 1 right
-                }
-            }
+        possibility = (BP >> 1) & WP & RANK_4 &~ FILE_H & EN_PASSANT; // EN PASSANT RIGHT
+        if (possibility != 0) {
+            int index = Long.numberOfTrailingZeros(possibility);
+            list += "" + ((index % 8) + 1) + (index % 8) + "PE";
+        }
+        possibility = (BP << 1) & WP & RANK_4 &~ FILE_A & EN_PASSANT; // EN PASSANT LEFT
+        if (possibility != 0) {
+            int index = Long.numberOfTrailingZeros(possibility);
+            list += "" + ((index % 8) - 1) + (index % 8) + "PE";
         }
         //System.out.println("List of possible black pawn moves: " + list);
         return list;
@@ -554,6 +607,28 @@ public class Moves {
             return list;
         }
     }
+    public static String possibleCastleWhite(long WR, boolean CQSW, boolean CKSW) {
+        String list = "";
+        if (CQSW && ((1L << CASTLE_ROOKS[1]) & WR) != 0) {
+            list += "QSwC";
+        }
+        if (CKSW && ((1L << CASTLE_ROOKS[0]) & WR) !=0) {
+            list += "KSwC";
+        }
+        System.out.println("List of possible castling moves for white: " + list);
+        return list;
+    }
+    public static String possibleCastleBlack(long BR, boolean CQSB, boolean CKSB) {
+        String list = "";
+        if (CQSB && ((1L << CASTLE_ROOKS[3]) & BR) !=0) {
+            list += "QSbC";
+        }
+        if (CKSB && ((1L << CASTLE_ROOKS[2]) & BR ) != 0) {
+            list += "KSbC";
+        }
+        System.out.println("List of possible castling for black: " + list);
+        return list;
+    }
     public static void drawBitboard (long bitboard) {
         String chessBoard[][] = new String[8][8];
         for (int i = 0; i < 64; i++) {
@@ -567,11 +642,11 @@ public class Moves {
             System.out.println(Arrays.toString(chessBoard[i]));
         }
     }
-    public static void timeExperiment(String history, long WP, long BP) {
+    public static void timeExperiment(long WP, long BP, long EN_PASSANT) {
         int loopLength = 1;
         long startTime = System.currentTimeMillis();
         //System.out.println("That took " + (endTime - startTime) + " milliseconds for the Method A.");
-        possiblePawnWhite("", WP, BP);
+        possiblePawnWhite(WP, BP, EN_PASSANT);
         long endTime = System.currentTimeMillis();
         System.out.println("That took " + (endTime - startTime) + " milliseconds for possiblePawnWhite.");
     }

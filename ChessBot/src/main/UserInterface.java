@@ -5,9 +5,12 @@ import java.awt.event.*;
 import javax.swing.*;
 
 public class UserInterface extends JPanel{
-	static long WP = 0L, WN = 0L, WB = 0L, WR = 0L, WQ = 0L, WK = 0L, BP = 0L, BN = 0L, BB = 0L, BR = 0L, BQ = 0L, BK = 0L;
+	static long WP = 0L, WN = 0L, WB = 0L, WR = 0L, WQ = 0L, WK = 0L, BP = 0L, BN = 0L, BB = 0L, BR = 0L, BQ = 0L, BK = 0L, EN_PASSANT = 0L;
 	static long WHITE_PIECES = 0L, BLACK_PIECES = 0L;
 	static long universalWP = 0L, universalWN = 0L, universalWB = 0L, universalWR = 0L, universalWQ = 0L, universalWK = 0L, universalBP = 0L, universalBN = 0L, universalBB = 0L, universalBR = 0L, universalBQ = 0L, universalBK = 0L;
+	static boolean CASTLE_QUEENSIDE_WHITE = true, CASTLE_KINGSIDE_WHITE = true, CASTLE_QUEENSIDE_BLACK = true, CASTLE_KINGSIDE_BLACK = true, CQSW = true, CKSW = true, CQSB = true, CKSB = true;
+	static boolean universalCQSW = true, universalCKSW = true, universalCQSB = true, universalCKSB = true;
+	static boolean WHITE_TURN;
 	static int humanIsWhite = 1;
 	static int rating = 0;
 	static int border = 10; // Amount of empty space around the frame
@@ -204,8 +207,8 @@ public class UserInterface extends JPanel{
 	}
 	public static void newGame() {
 		BoardGeneration.initiateStandardBoard();
-		Moves.validMovesWhite("", WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
-		Moves.validMovesBlack("", WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
+		Moves.validMovesWhite(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK, EN_PASSANT, CQSW, CKSW, CQSB, CKSB);
+		Moves.validMovesBlack(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK, EN_PASSANT, CQSW, CKSW, CQSB, CKSB);
 	}
 	
 }
