@@ -10,7 +10,7 @@ public class UserInterface extends JPanel{
 	static long universalWP = 0L, universalWN = 0L, universalWB = 0L, universalWR = 0L, universalWQ = 0L, universalWK = 0L, universalBP = 0L, universalBN = 0L, universalBB = 0L, universalBR = 0L, universalBQ = 0L, universalBK = 0L;
 	static boolean CASTLE_QUEENSIDE_WHITE = true, CASTLE_KINGSIDE_WHITE = true, CASTLE_QUEENSIDE_BLACK = true, CASTLE_KINGSIDE_BLACK = true, CQSW = true, CKSW = true, CQSB = true, CKSB = true;
 	static boolean universalCQSW = true, universalCKSW = true, universalCQSB = true, universalCKSB = true;
-	static boolean WHITE_TURN;
+	static boolean WHITE_TURN = true;
 	static int humanIsWhite = 1;
 	static int rating = 0;
 	static int border = 10; // Amount of empty space around the frame
@@ -24,6 +24,20 @@ public class UserInterface extends JPanel{
 		javaF.setLocation((Toolkit.getDefaultToolkit().getScreenSize().width-javaF.getWidth()) / 2, (Toolkit.getDefaultToolkit().getScreenSize().height-javaF.getHeight()) / 2);
 		javaF.setVisible(true);
 		newGame();
+		//BoardGeneration.drawArray(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
+		//BoardGeneration.initiateStandardBoard();
+		Perft.perft(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK, EN_PASSANT, CQSW, CKSW, CQSB, CKSB, WHITE_TURN, 0);
+		System.out.println("Perft move counter: " + Perft.perftMoveCounter);
+
+		/*
+		int currentFile = 1;
+		for (long file : Moves.FileMasks) {
+			System.out.println("File: " + currentFile);
+			System.out.println(file);
+			currentFile++;
+		}
+
+		 */
 		javaF.repaint();
 	}
 	@Override

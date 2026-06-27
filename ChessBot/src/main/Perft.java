@@ -19,8 +19,10 @@ public class Perft {
             String moves;
             if (WHITE_TURN) {
                 moves = Moves.validMovesWhite(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK, EN_PASSANT, CQSW, CKSW, CQSB, CKSB);
+                //System.out.println(moves);
             } else {
                 moves = Moves.validMovesBlack(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK, EN_PASSANT, CQSW, CKSW, CQSB, CKSB);
+                //System.out.println(moves);
             }
             for (int i = 0; i < moves.length(); i += 4) {
                 long WPt = Moves.makeMove(WP, moves.substring(i, (i + 4)), 'p'), WNt = Moves.makeMove(WN, moves.substring(i, (i + 4)), 'n'),
@@ -30,6 +32,8 @@ public class Perft {
                         BBt = Moves.makeMove(BB, moves.substring(i, (i + 4)), 'B'), BRt = Moves.makeMove(BR, moves.substring(i, (i + 4)), 'R'),
                         BQt = Moves.makeMove(BQ, moves.substring(i, (i + 4)), 'Q'), BKt = Moves.makeMove(BK, moves.substring(i, (i + 4)), 'K'),
                         EN_PASSANTt = Moves.makeMoveTwoStep(WP | BP, moves.substring(i, (i + 4)));
+
+                // AFFECTS CASTLING RIGHTS
                 boolean CQSWt = CQSW, CKSWt = CKSW, CQSBt = CQSB, CKSBt = CKSB;
                 if (Character.isDigit(moves.charAt(3))) {
                     int start = (Character.getNumericValue(moves.charAt(i))) + (Character.getNumericValue(moves.charAt(i + 1)) * 8); // x1y1 index
@@ -40,9 +44,11 @@ public class Perft {
                     if (((1L << start) & BR & (1L << 7)) != 0) {CKSBt = false;}
                     if (((1L << start) & BR & 1L) != 0) {CQSBt = false;}
                 }
-                if (((WK & Moves.inSightsBlack(WPt, WNt, WBt, WRt, WQt, WKt, BPt, BNt, BBt, BRt, BQt, BKt)) == 0 && WHITE_TURN) || ((BK & Moves.inSightsWhite(WPt, WNt, WBt, WRt, WQt, WKt, BPt, BNt, BBt, BRt, BQt, BKt)) == 0) & !WHITE_TURN) {
-                    if (depth +1 == perftMaxDepth) {perftMoveCounter++;}
-                    perft(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK, EN_PASSANT, CQSW, CKSW, CQSB, CKSB, !WHITE_TURN, depth++);
+
+                // If the move is safe for king | 0 means the bit is not targetable by other color
+                if (((WKt & Moves.inSightsBlack(WPt, WNt, WBt, WRt, WQt, WKt, BPt, BNt, BBt, BRt, BQt, BKt)) == 0 && WHITE_TURN) || ((BK & Moves.inSightsWhite(WPt, WNt, WBt, WRt, WQt, WKt, BPt, BNt, BBt, BRt, BQt, BKt)) == 0) & !WHITE_TURN) {
+                    if (depth + 1 == perftMaxDepth) {perftMoveCounter++;} // adds leaf nodes to counter (how many ending positions after max depth
+                    perft(WPt, WNt, WBt, WRt, WQt, WKt, BPt, BNt, BBt, BRt, BQt, BKt, EN_PASSANTt, CQSWt, CKSWt, CQSBt, CKSBt, !WHITE_TURN, depth + 1);
                 }
             }
         }

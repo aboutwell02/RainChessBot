@@ -69,6 +69,7 @@ public class Moves {
         //int numberOfPossibleMoves = list.length() / 4;
         //System.out.println("This is the list for white: " + list);
         //System.out.println("Number of possible moves for white: " + numberOfPossibleMoves);
+        //inSightsBlack(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
         return list;
     }
     public static String validMovesBlack(long WP, long WN, long WB, long WR, long WQ, long WK, long BP, long BN, long BB, long BR, long BQ, long BK, long EN_PASSANT, boolean CQSW, boolean CKSW, boolean CQSB, boolean CKSB) {
@@ -76,27 +77,18 @@ public class Moves {
         WHITE_PIECES = (WP | WN | WB | WR | WQ);
         OCCUPIED = (WP | WN | WB | WR | WQ | WK | BP | BN | BB | BR | BQ | BK);
         EMPTY =~ OCCUPIED;
-        //timeExperiment(history, WP, BP);
+        //timeExperiment(history, BP, WP);
         String list = possiblePawnBlack(BP, WP, EN_PASSANT) + possibleBishop(OCCUPIED, BB) + possibleRook(OCCUPIED, BR) + possibleQueen(OCCUPIED, BQ) + possibleKnight(OCCUPIED, BN) + possibleKing(OCCUPIED, BK) + possibleCastleBlack(BR, CQSB, CKSB);
         //int numberOfPossibleMoves = list.length() / 4;
-        //System.out.println("This is the list for black: " + list);
+        //System.out.println("This is the move list for black: " + list);
         //System.out.println("Number of possible moves for black: " + numberOfPossibleMoves);
+        //Moves.drawBitboard(inSightsWhite(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK));
         return list;
-    }
-    public static long makeMoveWrong(String move, long WP, long WN, long WB, long WR, long WQ, long WK, long BP, long BN, long BB, long BR, long BQ, long BK, long EN_PASSANT) {
-        /*
-        long WPt = Moves.makeMove(moves.substring(i, i + 4), 'p'), WNt = Moves.makeMove(moves.substring(i, i + 4), 'n'), WBt = Moves.makeMove(moves.substring(i, i + 4), 'b'),
-        WRt = Moves.makeMove(moves.substring(i, i + 4), 'r'), WQt = Moves.makeMove(moves.substring(i, i + 4), 'q'), WKt = Moves.makeMove(moves.substring(i, i + 4), 'k'),
-        BPt = Moves.makeMove(moves.substring(i, i + 4), 'P'), BNt = Moves.makeMove(moves.substring(i, i + 4), 'N'), BBt = Moves.makeMove(moves.substring(i, i + 4), 'B'),
-        BRt = Moves.makeMove(moves.substring(i, i + 4), 'R'), BQt = Moves.makeMove(moves.substring(i, i + 4), 'Q'), BKt = Moves.makeMove(moves.substring(i, i + 4), 'K'),
-        WEN_PASSANTt = Moves.makeMoveTwoStep(moves.substring(i, i + 4), 'p'), BEN_PASSANTt = Moves.makeMovesTwoStep(i, (i + 4), 'P');
-         */
-        return 0;
     }
     public static long makeMove (long board, String move, char type) {
         if (Character.isDigit(move.charAt(3))) {
             int start = (Character.getNumericValue(move.charAt(0))) + (Character.getNumericValue(move.charAt(1)) * 8); // x + (y * 8) = index
-            int end = (Character.getNumericValue(move.charAt(2)) * 8) + (Character.getNumericValue(move.charAt(3)));
+            int end = (Character.getNumericValue(move.charAt(2))) + (Character.getNumericValue(move.charAt(3)) * 8);
             if (((board >> start) & 1) == 1) {board &=~ (1L << start); board |= (1L << end);} else {board &=~ (1L << end);} // removes bit from starting location and adds bit to end location. removes all other bits in same location
         } else if (move.charAt(3) == 'P') { // PAWN PROMOTION
             int start, end;
@@ -120,9 +112,7 @@ public class Moves {
                 board &=~ (1L << (FileMasks[move.charAt(1) - '0'] & RankMasks[3]));
             }
             if (((board >> start) & 1) == 1) {board &=~ (1L << start); board |= (1L << end);} // not capturing at end location
-        }
-        /*
-        else if (move.charAt(3) == 'C') { // CASTLING
+        } else if (move.charAt(3) == 'C') { // CASTLING
             int startKing, endKing, startRook, endRook;
             if (move.charAt(2) == 'w') { // white castling
                 if (move.charAt(0) == 'Q') {
@@ -133,9 +123,7 @@ public class Moves {
                     board &=~ ((1L << startKing) | (1L << startRook)); board |= ((1L << endKing) | (1L << endRook));
                 }
             }
-        }
-         */
-        else {
+        } else {
             System.out.println("Move is not in valid notation. Ending character is: " + move.charAt(3));
         }
         return board;
@@ -153,11 +141,12 @@ public class Moves {
         long unsafe;
         OCCUPIED = WP | WN | WB | WR | WQ | WK | BP | BN | BB | BR | BQ | BK;
         // PAWNS
-        unsafe = ((WP >> 7) &~ FILE_A) | ((WP >> 9) &~ FILE_H);
+        unsafe = ((WP >> 7) &~ FILE_A);
+        unsafe |= ((WP >> 9) &~ FILE_H);
         long possibility;
         // KNIGHTS
-        long i = WN & - WN;
-        if (i != 0) {
+        long i = WN & -WN;
+        while (i != 0) {
             int iSquare = Long.numberOfTrailingZeros(i);
             if (iSquare > 18) {
                 possibility = KNIGHT_RANGE << (iSquare - 18);
@@ -206,19 +195,21 @@ public class Moves {
             possibility &=~ FILE_AB;
         }
         unsafe |= possibility;
-        System.out.println("The bitboard for square targetable by white pieces is: ");
-        drawBitboard(unsafe);
+        //System.out.println("The bitboard for square targetable by white pieces is: ");
+        //drawBitboard(unsafe);
         return unsafe;
     }
     public static long inSightsBlack(long WP, long WN, long WB, long WR, long WQ, long WK, long BP, long BN, long BB, long BR, long BQ, long BK) {
         long unsafe;
         OCCUPIED = WP | WN | WB | WR | WQ | WK | BP | BN | BB | BR | BQ | BK;
         // PAWNS
-        unsafe = ((BP << 7) &~ FILE_H) | ((BP << 9) &~ FILE_A);
+        unsafe = ((BP << 7) &~ FILE_H);
+        unsafe |= ((BP << 9) &~ FILE_A);
         long possibility;
         // KNIGHTS
-        long i = BN & - BN;
-        if (i != 0) {
+        long i = BN & -BN;
+        //System.out.println("First knight: " + i);
+        while (i != 0) {
             int iSquare = Long.numberOfTrailingZeros(i);
             if (iSquare > 18) {
                 possibility = KNIGHT_RANGE << (iSquare - 18);
@@ -233,26 +224,31 @@ public class Moves {
             unsafe |= possibility;
             BN &=~ i;
             i = BN & -BN;
+            //System.out.println("Next knight: " + i);
         }
         // DIAGONAL LINES OF SIGHT
         long diagonals = BB | BQ;
         i = diagonals & -diagonals;
+        //System.out.println("First diagonal: " + i);
         while (i != 0) {
             int iSquare = Long.numberOfTrailingZeros(i);
             possibility = diagonalSlidingMovement(iSquare);
             unsafe |= possibility;
             diagonals &=~ i;
             i = diagonals & -diagonals;
+            //System.out.println("Next diagonal: " + i);
         }
         // ORTHOGONAL LINES OF SIGHT
         long orthogonals = BR | BQ;
         i = orthogonals & -orthogonals;
+        //System.out.println("First orthogonal: " + i);
         while (i != 0) {
             int iSquare = Long.numberOfTrailingZeros(i);
             possibility = orthogonalSlidingMovement(iSquare);
             unsafe |= possibility;
             orthogonals &=~ i;
             i = orthogonals & -orthogonals;
+            //System.out.println("Next orthogonal: " + i);
         }
         // KING
         int iSquare = Long.numberOfTrailingZeros(BK);
@@ -267,8 +263,8 @@ public class Moves {
             possibility &=~ FILE_AB;
         }
         unsafe |= possibility;
-        System.out.println("The bitboard for square targetable by white pieces is: ");
-        drawBitboard(unsafe);
+        //System.out.println("The bitboard for square targetable by black pieces is: ");
+        //drawBitboard(unsafe);
         return unsafe;
     }
     public static String possiblePawnWhite(long WP, long BP, long EN_PASSANT) {
@@ -507,8 +503,9 @@ public class Moves {
             N &=~ i;
             i = N & -N;
         }
-        // int numberOfPossibileMoves = list.length() / 4;
+        //int numberOfPossibleMoves = list.length() / 4;
         //System.out.println("List of possible white knight moves: " + list);
+        //System.out.println("Number of possible knight moves: " + numberOfPossibleMoves);
         return list;
     }
     public static String possibleBishop(long OCCUPIED, long B) {
@@ -529,8 +526,9 @@ public class Moves {
             B &=~ i;
             i = B & -B; // Next bishop if available
         }
-        // int numberOfPossibleMoves = list.length() / 4;
-        //System.out.println("List of possible white bishop moves: " + list);
+        int numberOfPossibleMoves = list.length() / 4;
+        //System.out.println("List of possible bishop moves: " + list);
+        //System.out.println("Number of possible moves for bishop: " + numberOfPossibleMoves);
         return list;
     }
     public static String possibleRook(long OCCUPIED, long R) {
@@ -551,7 +549,7 @@ public class Moves {
             i = R & -R;
         }
         // int numberOfPossibleMoves = list.length() / 4;
-        //System.out.println("List of possible white rook moves: " + list);
+        //System.out.println("List of possible rook moves: " + list);
         return list;
     }
     public static String possibleQueen(long OCCUPIED, long Q) {
@@ -573,14 +571,15 @@ public class Moves {
             Q &=~ i;
             i = Q & -Q;
         }
-        // int numberOfPossibleMoves = list.length() / 4;
-        //System.out.println("List of possible white queen moves: " + list);
+        //int numberOfPossibleMoves = list.length() / 4;
+        //System.out.println("List of possible queen moves: " + list);
+        //System.out.println("Number of possible moves: " + numberOfPossibleMoves);
         return list;
     }
     public static String possibleKing(long OCCUPIED, long K) {
         // TODO: Remove illegal moves from possible moves list
         String list = "";
-        if (K == 0) {
+        if (K == 0) { // no king on board
             return list;
         } else {
             long possibility;
@@ -595,38 +594,43 @@ public class Moves {
             } else {
                 possibility &=~ FILE_AB & INVALID_CAPTURES;
             }
-            long j = possibility & - possibility;
+            long j = possibility & -possibility;
             while (j != 0) {
                 int index = Long.numberOfTrailingZeros(j);
                 list += "" + (iSquare % 8) + (iSquare / 8) + (index % 8) + (index / 8);
                 possibility &=~ j;
                 j = possibility & -possibility;
             }
-            // int numberOfPossibileMoves = list.lenght() / 4;
+            //int numberOfPossibleMoves = list.length() / 4;
             //System.out.println("List of possible king moves: " + list);
+            //System.out.println("Number of possible king moves: " + numberOfPossibleMoves);
             return list;
         }
     }
     public static String possibleCastleWhite(long WR, boolean CQSW, boolean CKSW) {
         String list = "";
-        if (CQSW && ((1L << CASTLE_ROOKS[1]) & WR) != 0) {
+        boolean clearToCastle = (((EMPTY >> 57) & 1) == 1) && (((EMPTY >> 58) & 1) == 1) && (((EMPTY >> 59) & 1) == 1); // will be true if squares between king and rook are empty
+        if ((CQSW && ((1L << CASTLE_ROOKS[1]) & WR) !=0) && clearToCastle) { // QUEENSIDE
             list += "QSwC";
         }
-        if (CKSW && ((1L << CASTLE_ROOKS[0]) & WR) !=0) {
+        clearToCastle = (((EMPTY >> 61) & 1) == 1) && (((EMPTY >> 62) & 1) == 1);
+        if ((CKSW && ((1L << CASTLE_ROOKS[0]) & WR ) != 0) && clearToCastle) { // KING SIDE
             list += "KSwC";
         }
-        System.out.println("List of possible castling moves for white: " + list);
+        //System.out.println("List of possible castling for white: " + list);
         return list;
     }
     public static String possibleCastleBlack(long BR, boolean CQSB, boolean CKSB) {
         String list = "";
-        if (CQSB && ((1L << CASTLE_ROOKS[3]) & BR) !=0) {
+        boolean clearToCastle = (((EMPTY >> 1) & 1) == 1) && (((EMPTY >> 2) & 1) == 1) && (((EMPTY >> 3)& 1) == 1);
+        if ((CQSB && ((1L << CASTLE_ROOKS[3]) & BR) !=0) && clearToCastle) { // QUEENSIDE
             list += "QSbC";
         }
-        if (CKSB && ((1L << CASTLE_ROOKS[2]) & BR ) != 0) {
+        clearToCastle = (((EMPTY >> 5) & 1) == 1) && (((EMPTY >> 6) & 1) == 1);
+        if ((CKSB && ((1L << CASTLE_ROOKS[2]) & BR ) != 0) && clearToCastle) { // KING SIDE
             list += "KSbC";
         }
-        System.out.println("List of possible castling for black: " + list);
+        //System.out.println("List of possible castling for black: " + list);
         return list;
     }
     public static void drawBitboard (long bitboard) {

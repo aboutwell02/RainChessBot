@@ -177,6 +177,59 @@ public class BoardGeneration {
 		chessBoard[7][counter] = "r";
 		arrayToBitboards(chessBoard, WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
 	}
+
+	public static void importFEN(String fenString) {
+		// resetEngineBoard();
+		UserInterface.WP = 0; UserInterface.WN = 0; UserInterface.WB = 0; UserInterface.WR = 0;
+		UserInterface.WQ = 0; UserInterface.WK = 0; UserInterface.BP = 0; UserInterface.BN = 0;
+		UserInterface.BB = 0; UserInterface.BR = 0; UserInterface.BQ = 0; UserInterface.BK = 0;
+		UserInterface.CQSW = false; UserInterface.CKSW = false;
+		UserInterface.CQSB = false; UserInterface.CKSB = false;
+		int charIndex = 0;
+		int boardIndex = 0;
+		while (fenString.charAt(charIndex) != ' ') {
+			switch (fenString.charAt(charIndex++)) {
+				case 'p': UserInterface.WP |= (1L << boardIndex++); break;
+				case 'n': UserInterface.WN |= (1L << boardIndex++); break;
+				case 'b': UserInterface.WB |= (1L << boardIndex++); break;
+				case 'r': UserInterface.WR |= (1L << boardIndex++); break;
+				case 'q': UserInterface.WQ |= (1L << boardIndex++); break;
+				case 'k': UserInterface.WK |= (1L << boardIndex++); break;
+				case 'P': UserInterface.BP |= (1L << boardIndex++); break;
+				case 'N': UserInterface.BN |= (1L << boardIndex++); break;
+				case 'B': UserInterface.BB |= (1L << boardIndex++); break;
+				case 'R': UserInterface.BR |= (1L << boardIndex++); break;
+				case 'Q': UserInterface.BQ |= (1L << boardIndex++); break;
+				case 'K': UserInterface.BK |= (1L << boardIndex++); break;
+				case '/': break;
+				case '1': boardIndex++;
+				case '2': boardIndex = boardIndex + 2;
+				case '3': boardIndex = boardIndex + 3;
+				case '4': boardIndex = boardIndex + 4;
+				case '5': boardIndex = boardIndex + 5;
+				case '6': boardIndex = boardIndex + 6;
+				case '7': boardIndex = boardIndex + 7;
+				case '8': boardIndex = boardIndex + 8;
+				default: break;
+			}
+		}
+		UserInterface.WHITE_TURN = (fenString.charAt(++charIndex) == 'w');
+		charIndex += 2;
+		while (fenString.charAt(charIndex) != ' ') {
+			switch (fenString.charAt(charIndex++)) {
+				case '-': break;
+				case 'k': UserInterface.CKSW = true; break;
+				case 'q': UserInterface.CQSW = true; break;
+				case 'K': UserInterface.CKSB = true; break;
+				case 'Q': UserInterface.CQSB = true; break;
+				default: break;
+			}
+		}
+		if (fenString.charAt(++charIndex) != '-') {
+			UserInterface.EN_PASSANT = Moves.FileMasks[fenString.charAt(charIndex++) - 'a'];
+		}
+		// TODO: Utilize rest of FEN string
+	}
 	
 	public static void arrayToBitboards(String[][] chessBoard, long WP, long WN, long WB, long WR, long WQ, long WK, long BP, long BN, long BB, long BR, long BQ, long BK) {
 		/*
@@ -234,7 +287,7 @@ public class BoardGeneration {
 			}
 			binary = binary<<1;
 		}
-		drawArray(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
+		//drawArray(WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK);
 		UserInterface.WP = WP;
 		UserInterface.WN = WN;
 		UserInterface.WB = WB;
